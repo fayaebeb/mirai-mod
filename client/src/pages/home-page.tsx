@@ -7,23 +7,7 @@ import { useLocation } from "wouter"; // ✅ Correct router for your stack
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Badge } from "@/components/ui/badge";
 
-const NetworkStatus = ({ isOnline }: { isOnline: boolean }) => {
-  return (
-    <div className="absolute top-[5.3rem] right-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/90 backdrop-blur-md border shadow-lg z-50 transition-all duration-300 hover:shadow-xl">
-      {isOnline ? (
-        <>
-          <Wifi className="h-3.5 w-3.5 text-green-500 animate-pulse" />
-          <span className="text-xs font-medium text-green-600">🌸 オンライン</span>
-        </>
-      ) : (
-        <>
-          <WifiOff className="h-3.5 w-3.5 text-red-500" />
-          <span className="text-xs font-medium text-red-600">😴 オフライン</span>
-        </>
-      )}
-    </div>
-  );
-};
+
 
 export default function HomePage() {
   const { user, logoutMutation } = useAuth();
@@ -111,32 +95,30 @@ export default function HomePage() {
         {/* CENTER: Absolutely positioned Sakura logo */}
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none text-center">
           <img
-            src="/images/skmod.png"
+            src="/images/miraimod.png"
             alt="Sakura AI Logo"
-            className="h-[6rem] sm:h-[7rem] w-auto drop-shadow-sm"
+            className="h-[5rem] sm:h-[7rem] w-auto drop-shadow-sm"
           />
 
-          
+
         </div>
       </header>
 
 
-      {/* Floating Network Status */}
-      <NetworkStatus isOnline={isOnline} />
 
       {/* Main Content with Improved Visuals */}
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="relative">
           {/* Decorative Elements */}
           <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-32 h-12 bg-[#f8eee2] rounded-full blur-2xl opacity-20"></div>
-          
+
           {/* Chat Interface Container with Enhanced Styling */}
           <div className="bg-gradient-to-br from-[#f7e6d0] to-[#f5e1cb] rounded-2xl shadow-lg overflow-hidden max-w-3xl mx-auto border border-[#e8d6c0]">
             {/* Optional Chat Title */}
             <div className="px-4 py-3 bg-[#f2d9be]/70 border-b border-[#e8d6c0] flex justify-between items-center">
               <h2 className="text-[#7D2E3A] font-medium flex items-center gap-2">
-                <img src="/images/favicon.png" alt="Icon" className="w-5 h-5" />
-                桜AIデータ入力パネル
+                <img src="/images/mirai.png" alt="Icon" className="w-8 h-8" />
+                ミライAIデータ入力パネル
               </h2>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="bg-white/50 text-xs font-normal">
@@ -144,7 +126,7 @@ export default function HomePage() {
                 </Badge>
               </div>
             </div>
-            
+
             {/* Chat Interface Component */}
             <div className={isMobile ? "p-3" : "p-5"}>
               <ChatInterface />
@@ -152,11 +134,11 @@ export default function HomePage() {
           </div>
         </div>
       </main>
-      
+
       {/* Simple Footer */}
       <footer className="py-4 px-6 bg-[#471a23] text-white/70 text-xs text-center">
         <div className="container mx-auto">
-          <p>© 2025 桜AI</p>
+          <p>© 2025 ミライAI</p>
         </div>
       </footer>
     </div>

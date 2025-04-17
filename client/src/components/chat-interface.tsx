@@ -34,12 +34,12 @@ const Tutorial = ({ onClose }: { onClose: () => void }) => {
   const steps = [
     {
       title: "ようこそ！",
-      description: "「桜AI」は、PCKKにおいて、情報提供や質問への回答を行うAIです。私の役割は、さまざまなトピックについて正確で分かりやすい情報を提供し、ユーザーのリクエストに的確にお応えすることです。たとえば、データに基づくご質問には、社内資料や外部情報を参照しながら丁寧にお答えします。",
+      description: "「ミライAI」は、PCKKにおいて、情報提供や質問への回答を行うAIです。私の役割は、さまざまなトピックについて正確で分かりやすい情報を提供し、ユーザーのリクエストに的確にお応えすることです。たとえば、データに基づくご質問には、社内資料や外部情報を参照しながら丁寧にお答えします。",
       icon: <Sparkles className="h-5 w-5 text-pink-400" />
     },
     {
       title: "楽しくお話ししましょう！",
-      description: "「桜AI」は、OpenAIの生成モデル「ChatGPT-4o」を使用しています。社内の全国うごき統計に関する営業資料や、人流に関する社内ミニ講座の内容を基礎データとして取り込み、さらにWikipediaやGoogleのAPIを通じてインターネット上の情報も収集しています。これらの情報をもとに、最適な回答を生成しています。",
+      description: "「ミライAI」は、OpenAIの生成モデル「ChatGPT-4o」を使用しています。社内の全国うごき統計に関する営業資料や、人流に関する社内ミニ講座の内容を基礎データとして取り込み、さらにWikipediaやGoogleのAPIを通じてインターネット上の情報も収集しています。これらの情報をもとに、最適な回答を生成しています。",
       icon: <Heart className="h-5 w-5 text-red-400" />
     },
   ];
@@ -434,12 +434,20 @@ export default function ChatInterface() {
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-10 px-4">
               <div className="w-16 h-16 rounded-full bg-[#f8eee2] flex items-center justify-center mb-4">
-                <MessageSquare className="h-8 w-8 text-[#16213e]" />
+                <img src="/images/mirai.png"
+                  alt="Descriptive Alt Text"
+                  className="h-20 w-20 object-contain"
+                />
               </div>
-              <h3 className="text-lg font-medium text-center mb-2">AIと会話を始めましょう</h3>
+
+              <h3 className="text-lg font-medium text-center mb-2">ミライAIデータ入力パネル</h3>
               <p className="text-center text-muted-foreground text-sm max-w-md">
-                メッセージを送信するか、ファイルをアップロードして会話を開始できます。
+                📝テキストや🔗URLの入力、📁ファイルのアップロードができます。<br />
+                ❗注意：あいさつや誤情報などは入力しないでください。AIに記録されてしまいます。
               </p>
+
+
+
             </div>
           )}
           {messages.map((message) => (
@@ -449,7 +457,7 @@ export default function ChatInterface() {
             <div className="flex flex-col items-center gap-2 p-4 bg-[#f8eee2]/30 rounded-lg">
               <LoadingDots />
               <p className="text-sm text-muted-foreground">
-                {uploadFile.isPending ? "ファイルを処理中です..." : "桜AIが一生懸命考えているよ...！"}
+                {uploadFile.isPending ? "ファイルを処理中です..." : "ミライが処理中..."}
               </p>
             </div>
           )}
@@ -495,7 +503,7 @@ export default function ChatInterface() {
             ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={   isMobileDevice     ? "📝 テキスト 🔗 URL 📁 ファイル"     : "📝 テキスト 🔗 URL 📁 ファイルをここに入力・アップロードできます" }
+            placeholder={   isMobileDevice     ? "📝 テキスト 🔗 URL 📁 ファイル" : "📝 テキスト 🔗 URL 📁 ファイルをここに入力・アップロードできます" }
             className="flex-1 min-h-[40px] max-h-[150px] resize-none overflow-y-auto border-0 focus-visible:ring-0 px-3 py-2 text-sm sm:text-base"
 
             style={{ height: 'auto' }}

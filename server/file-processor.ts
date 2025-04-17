@@ -69,7 +69,7 @@ async function uploadToGoogleDriveAndGetLink(file: UploadedFile): Promise<string
   console.log(`📤 Uploading file to Google Drive: ${file.originalname}`);
   try {
     // Set your target folder ID (extracted from your Drive folder URL)
-    const folderID = "1Nh667VEAWXqshRZIpvkPW3nvv-d0RBR3";
+    const folderID = "1qqBeezp5DoBsRqrxdyf42wJmnZo12Fxe";
 
     // Prepare file metadata
     const fileMetadata = {
@@ -541,7 +541,7 @@ export async function storeInAstraDB(extractedTexts: string[], metadata: ChunkMe
       metadata: metadata[index] || {},
     }));
 
-    await db.collection("files").insertMany(documents);
+    await db.collection("data").insertMany(documents);
     console.log("✅ Successfully stored text chunks in AstraDB.");
   } catch (error) {
     console.error("❌ AstraDB storage error:", error);
@@ -556,7 +556,7 @@ export async function storeInAstraDB(extractedTexts: string[], metadata: ChunkMe
 export async function deleteFileFromAstraDB(filename: string): Promise<void> {
   console.log(`🗑️ Deleting file data from AstraDB: ${filename}`);
   try {
-    await db.collection("files").deleteMany({
+    await db.collection("data").deleteMany({
       "metadata.filename": filename
     });
     console.log("✅ Successfully deleted file data from AstraDB");
@@ -570,7 +570,7 @@ export async function deleteFileFromAstraDB(filename: string): Promise<void> {
 async function testAstraDBConnection() {
   try {
     console.log("Testing AstraDB connection...");
-    await db.collection("files").findOne({});
+    await db.collection("data").findOne({});
     console.log("✅ Successfully connected to AstraDB");
   } catch (error) {
     console.error("❌ Error connecting to AstraDB:", error);
@@ -587,7 +587,7 @@ export async function retrieveRelevantChunks(query: string, topK: number = 5): P
   console.log(`🔍 Searching AstraDB for relevant chunks: "${query}"`);
 
   try {
-    const results = await db.collection("files").find({
+    const results = await db.collection("data").find({
       $vector: {
         query: query,
         path: "content",
