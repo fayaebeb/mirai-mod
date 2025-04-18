@@ -13,6 +13,7 @@ import { google } from "googleapis";
 import { Readable } from "stream";
 import Papa from 'papaparse';
 import * as XLSX from "xlsx";
+import { fileURLToPath } from "url";
 
 const { SentenceTokenizer } = natural;
 
@@ -27,6 +28,10 @@ const client = new DataAPIClient(process.env.ASTRA_API_TOKEN);
 const db = client.db(process.env.ASTRA_DB_URL);
 
 // ✅ GOOGLE DRIVE AUTHENTICATION
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Write the Google service account JSON from env to file
 const keyPath = path.join(__dirname, "google-service-account.json");
 
 if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
