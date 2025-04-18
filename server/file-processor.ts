@@ -27,12 +27,21 @@ const client = new DataAPIClient(process.env.ASTRA_API_TOKEN);
 const db = client.db(process.env.ASTRA_DB_URL);
 
 // ✅ GOOGLE DRIVE AUTHENTICATION
-// Replace './google.json' with the path to your service account JSON key file
+const keyPath = path.join(__dirname, "google-service-account.json");
+
+if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+  fs.writeFileSync(keyPath, process.env.GOOGLE_SERVICE_ACCOUNT_JSON, "utf8");
+} else {
+  console.warn("⚠️ GOOGLE_SERVICE_ACCOUNT_JSON not set — Google Drive upload won't work.");
+}
+
+// Authenticate using the key file
 const auth = new google.auth.GoogleAuth({
-  keyFile: path.join(__dirname, "secrets/google-service-account.json"),
+  keyFile: keyPath,
   scopes: ["https://www.googleapis.com/auth/drive"],
 });
 
+// Initialize Google Drive API
 const drive = google.drive({ version: "v3", auth });
 
 interface ChunkMetadata {

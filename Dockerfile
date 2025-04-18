@@ -20,8 +20,6 @@ RUN npm install
 
 COPY . .
 
-COPY secrets/google-service-account.json ./secrets/google-service-account.json
-
 # ✅ Build everything
 RUN npm run build
 
