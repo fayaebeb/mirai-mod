@@ -1,5 +1,6 @@
 import { DataAPIClient } from "@datastax/astra-db-ts";
 import { promises as fs } from "fs";
+import { writeFileSync } from "fs";
 import ws from "ws";
 import { neonConfig } from "@neondatabase/serverless";
 import { OpenAI } from "openai";
@@ -35,7 +36,7 @@ const __dirname = path.dirname(__filename);
 const keyPath = path.join(__dirname, "google-service-account.json");
 
 if (process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
-  fs.writeFileSync(keyPath, process.env.GOOGLE_SERVICE_ACCOUNT_JSON, "utf8");
+  writeFileSync(keyPath, process.env.GOOGLE_SERVICE_ACCOUNT_JSON, "utf8");
 } else {
   console.warn("⚠️ GOOGLE_SERVICE_ACCOUNT_JSON not set — Google Drive upload won't work.");
 }
