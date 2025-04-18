@@ -158,6 +158,11 @@ export default function ChatInterface() {
     const tutorialShownKey = `${TUTORIAL_SHOWN_KEY_PREFIX}${user.id}`;
     setShowTutorial(false);
     localStorage.setItem(tutorialShownKey, 'true');
+
+    // Try to focus again after tutorial closes
+    setTimeout(() => {
+      textareaRef.current?.focus();
+    }, 100); // slight delay to allow layout to settle
   };
 
   const handleCloseWarning = () => {
@@ -339,16 +344,27 @@ export default function ChatInterface() {
   const [isDragging, setIsDragging] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const scrollAnchorRef = useRef<HTMLDivElement>(null);
+
+  // Auto-focus textarea on mount
+  useEffect(() => {
+    if (!showTutorial && !showWarning && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [showTutorial, showWarning]);
 
   // Auto-scroll to the bottom whenever messages update
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      }
-    }
-  }, [messages, sendMessage.isPending, uploadFile.isPending]);
+    const scrollToBottom = () => {
+      scrollAnchorRef.current?.scrollIntoView({ behavior: "auto" });
+    };
+
+    requestAnimationFrame(scrollToBottom); // immediately after paint
+    const timeout = setTimeout(scrollToBottom, 300); // fallback for slow render
+
+    return () => clearTimeout(timeout);
+  }, [messages?.length, sendMessage.isPending, uploadFile.isPending]);
+
 
   // Auto-resize textarea based on content
   useEffect(() => {
@@ -462,6 +478,7 @@ export default function ChatInterface() {
             </div>
           )}
         </div>
+        <div ref={scrollAnchorRef} />
       </ScrollArea>
 
       {showWarning && (
@@ -501,6 +518,7 @@ export default function ChatInterface() {
         <div className="flex-1 relative rounded-md overflow-hidden border border-[#e8d9c5] focus-within:ring-1 focus-within:ring-[#16213e] focus-within:border-[#16213e] bg-white">
           <Textarea
             ref={textareaRef}
+            autoFocus
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={   isMobileDevice     ? "📝 テキスト 🔗 URL 📁 ファイル" : "📝 テキスト 🔗 URL 📁 ファイルをここに入力・アップロードできます" }
