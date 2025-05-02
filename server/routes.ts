@@ -169,7 +169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           output_type: "chat",
           input_type: "chat",
           tweaks: {
-            " TextInput-6EyNV": {
+            " TextInput-zmi4A": {
               input_value: persistentSessionId,
             },
           },
