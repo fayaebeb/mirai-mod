@@ -169,6 +169,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           output_type: "chat",
           input_type: "chat",
           tweaks: {
+            
+  "ChatOutput-VmyLb": {
+    "should_store_message": false
+  },
+
             " TextInput-KoFhk": {
               input_value: persistentSessionId,
             },
