@@ -12,33 +12,42 @@ import { Button } from "./ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
 
-const formatTimestamp = (timestamp: string) => {
+const formatTimestamp = (timestamp: string | Date) => {
   try {
     return formatDistanceToNow(new Date(timestamp), {
       addSuffix: true,
-      locale: ja
+      locale: ja,
     });
   } catch {
     return "日付エラー";
   }
 };
 
+
 // Helper function to parse message content into sections
 const parseMessageContent = (content: string) => {
-  const sections = {
-    mainText: "",
-    companyDocs: "",
-    onlineInfo: ""
-  };
+  const sections = { mainText: "", companyDocs: "", onlineInfo: "" };
 
-  // Split by company docs marker
-  const [beforeCompanyDocs, afterCompanyDocs = ""] = content.split("### 社内文書情報:");
-  sections.mainText = beforeCompanyDocs.trim();
+  const companyMarker = "### 社内文書情報:";
+  const onlineMarker = "### オンラインWeb情報:";
 
-  // Split remaining content by online info marker
-  const [companyDocs, onlineInfo = ""] = afterCompanyDocs.split("### オンラインWeb情報:");
-  sections.companyDocs = companyDocs.trim();
-  sections.onlineInfo = onlineInfo.trim();
+  const companyIndex = content.indexOf(companyMarker);
+  const onlineIndex = content.indexOf(onlineMarker);
+
+  if (companyIndex !== -1 && (onlineIndex === -1 || companyIndex < onlineIndex)) {
+    sections.mainText = content.slice(0, companyIndex).trim();
+    if (onlineIndex !== -1) {
+      sections.companyDocs = content.slice(companyIndex + companyMarker.length, onlineIndex).trim();
+      sections.onlineInfo = content.slice(onlineIndex + onlineMarker.length).trim();
+    } else {
+      sections.companyDocs = content.slice(companyIndex + companyMarker.length).trim();
+    }
+  } else if (onlineIndex !== -1) {
+    sections.mainText = content.slice(0, onlineIndex).trim();
+    sections.onlineInfo = content.slice(onlineIndex + onlineMarker.length).trim();
+  } else {
+    sections.mainText = content.trim();
+  }
 
   return sections;
 };
@@ -102,7 +111,7 @@ export default function ChatMsg({ message }: { message: Message }) {
   const [emojiPosition, setEmojiPosition] = useState({ x: 0, y: 0 });
   const [decoration, setDecoration] = useState<string | null>(null);
 
-  
+
 
   const handleBotMessageHover = () => {
     if (message.isBot) {
@@ -186,89 +195,105 @@ export default function ChatMsg({ message }: { message: Message }) {
         transition={{ duration: 0.3 }}
         whileHover={message.isBot ? { scale: 1.02 } : { scale: 1 }}
         onHoverStart={handleBotMessageHover}
-        className={cn("max-w-[85%] sm:max-w-[75%] rounded-xl", {
-          "ml-auto self-end": !message.isBot,
-          "mr-auto self-start ml-2 sm:ml-3": message.isBot,
+        className={cn("rounded-xl", {
+          "max-w-[85%] sm:max-w-[75%] ml-auto self-end": !message.isBot,
+          "max-w-[90%] sm:max-w-[90%] mr-auto self-start ml-2 sm:ml-3": message.isBot,
         })}
       >
         <Card
-  className={cn(
-    "px-2 py-1.5 sm:px-4 sm:py-3 text-sm sm:text-base",
-    {
-      "bg-[#FFB7C5] text-black border border-[#FF98A5] shadow-md": !message.isBot,
-      "bg-gradient-to-br from-white to-pink-50 text-black border border-pink-100 shadow-md": message.isBot,
-    }
-  )}
->
-  <div className="prose prose-xs sm:prose-sm break-words font-medium w-full">
-    {message.isBot && sections ? (
-      <>
-        <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          components={{
-            table: ({ node, ...props }) => (
-              <div className="overflow-x-auto w-full">
-                <table className="text-[11px] sm:text-sm border-collapse w-full min-w-[400px]" {...props} />
-              </div>
-            ),
-            td: ({ node, ...props }) => (
-              <td className="border border-pink-200 px-1 py-0.5 sm:px-2 sm:py-1" {...props} />
-            ),
-            th: ({ node, ...props }) => (
-              <th className="border border-pink-300 bg-pink-50 px-1 py-0.5 sm:px-2 sm:py-1" {...props} />
-            ),
-          }}
+          className={cn(
+            "px-2 py-1.5 sm:px-4 sm:py-3 text-sm sm:text-base",
+            {
+              "bg-[#FFB7C5] text-black border border-[#FF98A5] shadow-md": !message.isBot,
+              "bg-gradient-to-br from-white to-pink-50 text-black border border-pink-100 shadow-md": message.isBot,
+            }
+          )}
         >
-          {sections.mainText}
-        </ReactMarkdown>
+  <div className="prose prose-xs sm:prose-sm break-words font-medium w-full">
+            {message.isBot && sections ? (
+              <>
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                      a: ({ href, children }) => (
+                        <a
+                          href={href}
+                          className="text-[#CC3366] hover:text-[#FF98A5] underline"
+                        >
+                          {children}
+                        </a>
+                    ),
+                    table: ({ node, ...props }) => (
+                      <div className="overflow-x-auto w-full">
+                        <table className="text-[11px] sm:text-sm border-collapse w-full min-w-[400px]" {...props} />
+                      </div>
+                    ),
+                    td: ({ node, ...props }) => (
+                      <td className="border border-pink-200 px-1 py-0.5 sm:px-2 sm:py-1" {...props} />
+                    ),
+                    th: ({ node, ...props }) => (
+                      <th className="border border-pink-300 bg-pink-50 px-1 py-0.5 sm:px-2 sm:py-1" {...props} />
+                    ),
+                  }}
+                >
+                  {sections.mainText}
+                </ReactMarkdown>
 
-        {/* Source sections */}
-        <div className="space-y-2">
-          {sections.companyDocs && (
-            <MessageSection
-              title="社内文書情報"
-              content={sections.companyDocs}
-              icon={FileText}
-            />
-          )}
+                {/* Source sections */}
+                <div className="space-y-2">
+                  {sections.companyDocs && (
+                    <MessageSection
+                      title="社内文書情報"
+                      content={sections.companyDocs}
+                      icon={FileText}
+                    />
+                  )}
 
-          {sections.onlineInfo && (
-            <MessageSection
-              title="オンラインWeb情報"
-              content={sections.onlineInfo}
-              icon={Globe}
-            />
-          )}
-        </div>
-      </>
-    ) : (
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          table: ({ node, ...props }) => (
-            <div className="overflow-x-auto w-full">
-              <table className="text-[11px] sm:text-sm border-collapse w-full min-w-[400px]" {...props} />
-            </div>
-          ),
-          td: ({ node, ...props }) => (
-            <td className="border border-pink-200 px-1 py-0.5 sm:px-2 sm:py-1" {...props} />
-          ),
-          th: ({ node, ...props }) => (
-            <th className="border border-pink-300 bg-pink-50 px-1 py-0.5 sm:px-2 sm:py-1" {...props} />
-          ),
-        }}
-      >
-        {message.content}
-      </ReactMarkdown>
-    )}
-  </div>
+                  {sections.onlineInfo && (
+                    <MessageSection
+                      title="オンラインWeb情報"
+                      content={sections.onlineInfo}
+                      icon={Globe}
+                    />
+                  )}
+                </div>
+              </>
+            ) : (
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  a: ({ href, children }) => (
+                      <a
+                        href={href}
+                        className="text-[#CC3366] hover:text-[#FF98A5] underline"
+                      >
+                        {children}
+                      </a>
+                  ),
+                  table: ({ node, ...props }) => (
+                    <div className="overflow-x-auto w-full">
+                      <table className="text-[11px] sm:text-sm border-collapse w-full min-w-[400px]" {...props} />
+                    </div>
+                  ),
+                  td: ({ node, ...props }) => (
+                    <td className="border border-pink-200 px-1 py-0.5 sm:px-2 sm:py-1" {...props} />
+                  ),
+                  th: ({ node, ...props }) => (
+                    <th className="border border-pink-300 bg-pink-50 px-1 py-0.5 sm:px-2 sm:py-1" {...props} />
+                  ),
+                }}
+              >
+                {message.content}
+              </ReactMarkdown>
+            )}
+          </div>
 
           {message.timestamp && (
             <div className="text-[9px] sm:text-[10px] text-gray-400 mt-1 text-right">
               {formatTimestamp(message.timestamp)}
             </div>
           )}
-</Card>
+        </Card>
 
       </motion.div>
     </div>
