@@ -7,6 +7,8 @@ import { processFile, storeInAstraDB, deleteFileFromAstraDB } from "./file-proce
 import { insertMessageSchema } from "@shared/schema";
 import { DataAPIClient } from "@datastax/astra-db-ts";
 import { ModeratorStorage } from "./ModeratorStorage";
+import userAppInviteTokensRoute from "./api/user-app-invite-tokens";
+
 const moderatorStorage = new ModeratorStorage();
 
 
@@ -31,7 +33,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // File Upload Endpoint
   app.post("/api/upload", upload.array('files', 10), async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+
     const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) {
       return res.status(400).json({ error: "No files uploaded" });
@@ -47,13 +49,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.ms-excel"
     ];
-    
+
     const userId = req.user!.id;
     const { sessionId } = req.body;
-    
+
     // Process each file and track results
     const results = [];
-    
+
     for (const file of files) {
       // Validate file type
       if (!allowedMimeTypes.includes(file.mimetype)) {
@@ -64,7 +66,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         continue;
       }
-      
+
       try {
         // Create file record
         const fileRecord = await storage.createFile(userId, {
@@ -75,13 +77,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sessionId,
           status: "processing",
         });
-        
+
         results.push({
           filename: file.originalname,
           success: true,
           fileId: fileRecord.id
         });
-        
+
         // Process file asynchronously
         processFile(file, sessionId)
           .then(async () => {
@@ -123,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
     }
-    
+
     // Return the results of all file uploads
     res.json({ files: results });
   });
@@ -194,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-  
+
   app.get("/api/messages/:sessionId", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
@@ -207,6 +209,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(messages);
     } catch (error) {
       console.error("Error retrieving messages:", error);
+      res.status(500).json({
+        message: "Failed to retrieve messages",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
+  app.get("/api/messages", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      const messages = await storage.getAllMessagesWithUsers();
+      res.json(messages);
+    } catch (error) {
+      console.error("Error retrieving all messages:", error);
       res.status(500).json({
         message: "Failed to retrieve messages",
         error: error instanceof Error ? error.message : "Unknown error",
@@ -346,6 +363,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/moderator/messages", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      const { category } = req.query;
+
+      let allMessages = await moderatorStorage.getAllMessages();
+
+      res.json(allMessages);
+    } catch (error) {
+      console.error("Error retrieving all messages:", error);
+      res.status(500).json({
+        message: "Failed to retrieve all messages",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
   // Get all messages for a specific session ID
   app.get("/api/moderator/messages/:sessionId", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
@@ -362,6 +397,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // Get all feedback entries
+  app.get("/api/moderator/feedback", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      const feedback = await moderatorStorage.getAllFeedback();
+      res.json(feedback);
+    } catch (error) {
+      console.error("Error retrieving feedback entries:", error);
+      res.status(500).json({
+        message: "Failed to retrieve feedback entries",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
+  // Get feedback for a specific session
+  app.get("/api/moderator/feedback/session/:sessionId", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      const sessionId = req.params.sessionId;
+      const feedback = await moderatorStorage.getFeedbackBySessionId(sessionId);
+      res.json(feedback);
+    } catch (error) {
+      console.error("Error retrieving feedback for session:", error);
+      res.status(500).json({
+        message: "Failed to retrieve feedback for session",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
+  // Get feedback for a specific user
+  app.get("/api/moderator/feedback/user/:userId", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    try {
+      const userId = parseInt(req.params.userId, 10);
+      const feedback = await moderatorStorage.getFeedbackByUserId(userId);
+      res.json(feedback);
+    } catch (error) {
+      console.error("Error retrieving feedback for user:", error);
+      res.status(500).json({
+        message: "Failed to retrieve feedback for user",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
+  // Generate AI Summary of Feedback (OpenAI API)
+  app.post("/api/moderator/feedback/summary", async (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+
+    const { comments } = req.body;
+
+    if (!Array.isArray(comments) || comments.length === 0) {
+      return res.status(400).json({ error: "No comments provided" });
+    }
+
+    const inputText = comments.map((c: string) => `- ${c}`).join("\n");
+
+    try {
+      const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "summarize user feedback into concise insights in Japanese.",
+            },
+            {
+              role: "user",
+              content: `次のユーザーフィードバックコメントを要約してください:\n${inputText}`,
+            },
+          ],
+          temperature: 1.0,
+        }),
+      });
+
+      const data = await openaiRes.json();
+
+      if (!data.choices || !data.choices[0]?.message?.content) {
+        throw new Error("Invalid OpenAI response");
+      }
+
+      res.json({ summary: data.choices[0].message.content });
+    } catch (err) {
+      console.error("Error generating summary:", err);
+      res.status(500).json({ error: "Failed to generate summary" });
+    }
+  });
+
+  app.use("/api/user-app-invite-tokens", userAppInviteTokensRoute);
 
   const httpServer = createServer(app);
   return httpServer;

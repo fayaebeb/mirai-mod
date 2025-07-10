@@ -36,7 +36,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-[#7D2E3A] to-[#5D1E2A]">
       {/* ヘッダーセクション with Subtle Drop Shadow */}
-      <header className="relative border-b bg-gradient-to-r from-[#f8eee2] to-[#f5e8d8] shadow-md sticky top-0 z-10 h-[7rem] sm:h-[8rem]">
+      <header className=" border-b bg-gradient-to-r from-[#f8eee2] to-[#f5e8d8] shadow-md sticky top-0 z-10 h-[7rem] sm:h-[8rem]">
         <div className="flex justify-between items-center px-4 sm:px-6 py-3 sm:py-4 max-w-screen-xl mx-auto w-full h-full">
 
           {/* LEFT: Pacific Logo */}
@@ -70,6 +70,15 @@ export default function HomePage() {
               <span className="hidden sm:inline text-orange-800">モデレーター</span>
             </Button>
 
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLocation("/useradd")}
+              className="flex items-center gap-1 sm:gap-2 bg-white/80 hover:bg-white transition-colors whitespace-nowrap px-2 sm:px-3"
+            >
+              <FileText className="h-4 w-4 text-cyan-600" />
+              <span className="hidden sm:inline text-cyan-800">ユーザー招待</span>
+            </Button>
             <Button
               variant="outline"
               size="sm"

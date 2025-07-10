@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
@@ -43,7 +45,7 @@ export function setupAuth(app: Express) {
     store: storage.sessionStore,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      secure: true,
+      secure: false,
       httpOnly: true,
       sameSite: 'strict'
     }
@@ -218,4 +220,16 @@ export function setupAuth(app: Express) {
       res.status(500).send("Failed to upgrade users");
     }
   });
+}
+
+
+import { Request, Response, NextFunction } from "express";
+
+export function authMiddleware(handler: (req: Request, res: Response, user: Express.User) => any) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated?.() || !req.user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    return handler(req, res, req.user);
+  };
 }

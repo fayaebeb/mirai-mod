@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import { DataAPIClient } from "@datastax/astra-db-ts";
 import { promises as fs } from "fs";
 import { writeFileSync } from "fs";
