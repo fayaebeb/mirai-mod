@@ -1,3 +1,5 @@
+//client/src/pages/UserAdd.tsx
+
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Card } from "@/components/ui/card";
@@ -5,11 +7,11 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Copy, Plus, RefreshCw, ArrowLeft } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
-import { InviteToken } from "@shared/schema";
+import { InviteToken } from "@shared/moderatorSchema";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 
-export default function AdminPage() {
+export default function UserAdd() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
@@ -22,17 +24,17 @@ export default function AdminPage() {
     error,
     refetch,
   } = useQuery<InviteToken[]>({
-    queryKey: ["/api/admin/invite-tokens"],
+    queryKey: ["/api/user-app-invite-tokens"],
     enabled: !!user,
   });
 
   const createTokenMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/admin/invite-tokens");
+      const res = await apiRequest("POST", "/api/user-app-invite-tokens");
       return await res.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/invite-tokens"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user-app-invite-tokens"] });
       toast({
         title: "トークンを作成しました",
         description: "新しい招待トークンが生成されました",
@@ -89,7 +91,7 @@ export default function AdminPage() {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <h1 className="text-2xl sm:text-3xl font-bold text-[#16213e]">
-                管理者ダッシュボード
+                ユーザーアカウント作成用トークン生成
               </h1>
             </div>
             
@@ -101,7 +103,7 @@ export default function AdminPage() {
           <Card className="p-4 sm:p-6 bg-white/95 backdrop-blur-sm shadow-md rounded-xl border-0">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
               <h2 className="text-xl sm:text-2xl font-semibold text-[#16213e]">
-                招待トークン生成
+                ユーザーアカウント作成用トークン生成
               </h2>
               <div className="flex flex-col sm:flex-row sm:space-x-2 gap-2 w-full sm:w-auto">
                 <Button
@@ -175,49 +177,7 @@ export default function AdminPage() {
             )}
           </Card>
 
-          {/* Admin — Upgrade All Users */}
-          {/* <Card className="p-4 sm:p-6 bg-white/95 backdrop-blur-sm shadow-md rounded-xl border-0">
-            <h2 className="text-xl sm:text-2xl font-semibold text-[#16213e] mb-4">
-              管理者ツール
-            </h2>
-            <div className="p-4 bg-[#f8f5f0] rounded-lg border border-[#e8d9c5]">
-              <h3 className="text-lg sm:text-xl font-medium mb-2">
-                すべてのユーザーを管理者に設定
-              </h3>
-              <p className="text-sm sm:text-base text-gray-600 mb-4">
-                この操作を実行すると、システム内のすべてのユーザーが管理者権限を取得します。これは一度限りの操作です。
-              </p>
-              <Button
-                onClick={() => {
-                  fetch("/api/admin/upgrade-all-users", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                  })
-                    .then((res) => {
-                      if (res.ok) {
-                        toast({
-                          title: "成功",
-                          description: "すべてのユーザーが管理者に設定されました。",
-                        });
-                      } else {
-                        throw new Error("ユーザーの更新に失敗しました。");
-                      }
-                    })
-                    .catch((err) => {
-                      toast({
-                        title: "エラー",
-                        description: err.message,
-                        variant: "destructive",
-                      });
-                    });
-                }}
-                className="w-full bg-[#f296a8] hover:bg-[#f8b5c1] text-white transition-colors duration-200"
-              >
-                すべてのユーザーを管理者に設定する
-              </Button>
 
-            </div>
-          </Card> */}
         </div>
       </div>
     </div>

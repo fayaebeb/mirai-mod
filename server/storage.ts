@@ -90,6 +90,7 @@ export class DatabaseStorage implements IStorage {
         userId,
         ...message,
         fileId: message.fileId ?? null,
+        dbid: message.dbid ?? null,
       })
       .returning();
     return newMessage;
@@ -170,6 +171,7 @@ export class DatabaseStorage implements IStorage {
         contentType: files.contentType,
         size: files.size,
         vectorizedContent: files.vectorizedContent,
+        dbid: files.dbid,
         user_username: users.username,
       })
       .from(files)
@@ -187,6 +189,7 @@ export class DatabaseStorage implements IStorage {
       contentType: row.contentType,
       size: row.size,
       vectorizedContent: row.vectorizedContent,
+      dbid: row.dbid,
       user: row.user_username ? { username: row.user_username } : null
     }));
   }
@@ -215,6 +218,29 @@ export class DatabaseStorage implements IStorage {
     
     return results.map(row => row.sessionId);
   }
+
+  async getAllMessagesWithUsers(): Promise<
+    (Message & { username: string })[]
+  > {
+    const results = await db
+      .select({
+        id: messages.id,
+        content: messages.content,
+        isBot: messages.isBot,
+        timestamp: messages.timestamp,
+        sessionId: messages.sessionId,
+        userId: messages.userId,
+        fileId: messages.fileId,
+        dbid: messages.dbid,
+        username: users.username,
+      })
+      .from(messages)
+      .innerJoin(users, eq(messages.userId, users.id))
+      .orderBy(messages.timestamp);
+
+    return results;
+  }
+
 
   async getMessagesBySessionId(sessionId: string): Promise<Message[]> {
     return await db
