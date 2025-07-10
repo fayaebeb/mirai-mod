@@ -1,4 +1,4 @@
-import { Message } from "@shared/schema";
+import { Message } from "@shared/moderatorSchema";
 import { cn } from "@/lib/utils";
 import { Avatar } from "./ui/avatar";
 import { Card } from "./ui/card";
@@ -7,10 +7,11 @@ import remarkGfm from "remark-gfm";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronRight, FileText, Globe } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, Globe, Tag, Eye } from "lucide-react";
 import { Button } from "./ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
+import { Badge } from "./ui/badge";
 
 const formatTimestamp = (timestamp: string | Date) => {
   try {
@@ -106,7 +107,22 @@ const MessageSection = ({
   );
 };
 
+// Get badge variant based on category
+const getCategoryBadgeVariant = (category: string) => {
+  switch (category) {
+    case "SELF":
+      return "default"; // Default blue-ish style
+    case "PRIVATE":
+      return "secondary"; // Gray style
+    case "ADMINISTRATIVE":
+      return "destructive"; // Red style
+    default:
+      return "default";
+  }
+};
+
 export default function ChatMsg({ message }: { message: Message }) {
+
   const [showEmoji, setShowEmoji] = useState(false);
   const [emojiPosition, setEmojiPosition] = useState({ x: 0, y: 0 });
   const [decoration, setDecoration] = useState<string | null>(null);
@@ -175,13 +191,13 @@ export default function ChatMsg({ message }: { message: Message }) {
       )}
 
       {message.isBot && (
-        <Avatar className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 border border-pink-300 shadow-md">
+          <Avatar className="hidden sm:flex flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 border border-pink-300 shadow-md">
           <motion.div
             whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
             transition={{ rotate: { duration: 0.5 } }}
           >
             <img
-              src="/images/mirai.png"
+              src="/images/sakura-dp.png"
               alt="Sakura AI"
               className="w-full h-full object-cover rounded-full border-2 border-pink-400 shadow-md"
             />
@@ -209,7 +225,13 @@ export default function ChatMsg({ message }: { message: Message }) {
             }
           )}
         >
-  <div className="prose prose-xs sm:prose-sm break-words font-medium w-full">
+          {/* Display category badge */}
+          
+
+
+              <div className="prose prose-xs sm:prose-sm break-words font-medium max-w-none w-full">
+
+
             {message.isBot && sections ? (
               <>
                 <ReactMarkdown
@@ -294,7 +316,6 @@ export default function ChatMsg({ message }: { message: Message }) {
             </div>
           )}
         </Card>
-
       </motion.div>
     </div>
   );

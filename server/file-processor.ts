@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+import os from "os";
 import { DataAPIClient } from "@datastax/astra-db-ts";
 import { promises as fs } from "fs";
 import { writeFileSync } from "fs";
@@ -28,7 +29,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 // Initialize AstraDB client
 const client = new DataAPIClient(process.env.ASTRA_API_TOKEN);
-const db = client.db(process.env.ASTRA_DB_URL);
+const db = client.db(process.env.ASTRA_DB_URL!);
 
 // ✅ GOOGLE DRIVE AUTHENTICATION
 const __filename = fileURLToPath(import.meta.url);
@@ -146,7 +147,7 @@ async function pdfToImages(pdfBuffer: Buffer): Promise<string[]> {
   console.log("📄 Converting PDF to images...");
 
   // Create temporary directory for the conversion process
-  const tempDir = tmp.dirSync({ dir: "/tmp", unsafeCleanup: true });
+  const tempDir = tmp.dirSync({ dir: os.tmpdir(), unsafeCleanup: true });
   const tempPdfPath = path.join(tempDir.name, "input.pdf");
 
   try {
@@ -269,6 +270,7 @@ async function docxToImages(docxBuffer: Buffer): Promise<string[]> {
   }
 }
 
+
 /**
  * Process an image through GPT-4o with retry mechanism for handling rate limit errors
  */
@@ -335,6 +337,7 @@ Output only clean, structured content optimized for embedding in a vector databa
 }
 
 
+
 /**
  * Process text file into chunks for vector storage
  */
@@ -399,7 +402,7 @@ async function processTextFile(textBuffer: Buffer): Promise<string[]> {
  * Process files (PDF/PPTX/DOCX → Images → GPT-4V → AstraDB)
  * Also supports text files (TXT → Chunks → AstraDB)
  */
-export async function processFile(file: UploadedFile, sessionId: string): Promise<void> {
+  export async function processFile(file: UploadedFile, sessionId: string, dbid: string): Promise<void> {
   console.log(`📂 Processing file: ${file.originalname} (${file.mimetype})`);
 
   let extractedTexts: string[] = [];
@@ -503,10 +506,11 @@ export async function processFile(file: UploadedFile, sessionId: string): Promis
     const metadata: ChunkMetadata[] = extractedTexts.map(() => ({
       filename: file.originalname,
       filelink: driveSharedLink || undefined,
+      dbid: dbid, 
     }));
 
     // Store extracted data in AstraDB
-    await storeInAstraDB(extractedTexts, metadata);
+    await storeInAstraDB(extractedTexts, metadata, dbid);
 
     console.log(`📦 Successfully stored ${extractedTexts.length} chunks in AstraDB.`);
   } catch (error) {
@@ -544,33 +548,47 @@ async function chunkTabularData(rows: string[][], filename: string, sheetName?: 
 /**
  * Store extracted data in AstraDB
  */
-export async function storeInAstraDB(extractedTexts: string[], metadata: ChunkMetadata[]): Promise<void> {
-  console.log("📦 Storing data in AstraDB...");
+export async function storeInAstraDB(
+  extractedTexts: string[],
+  metadata: ChunkMetadata[],
+  dbid: string
+): Promise<void> {
+  console.log(`📦 Storing data in AstraDB collection '${dbid}'...`);
+
+  const validDbids = ["data", "db1", "db2"];
+  if (!validDbids.includes(dbid)) {
+    throw new Error(`Invalid dbid '${dbid}' specified`);
+  }
+
   try {
     const documents = extractedTexts.map((text, index) => ({
       $vectorize: text,
       metadata: metadata[index] || {},
     }));
 
-    await db.collection("data").insertMany(documents);
-    console.log("✅ Successfully stored text chunks in AstraDB.");
+    await db.collection(dbid).insertMany(documents);
+    console.log(`✅ Successfully stored text chunks in '${dbid}' collection.`);
   } catch (error) {
     console.error("❌ AstraDB storage error:", error);
-    throw error;  // <---- Ensure errors propagate
+    throw error;
   }
 }
+
 
 
 /**
  * Delete file data from AstraDB
  */
-export async function deleteFileFromAstraDB(filename: string): Promise<void> {
-  console.log(`🗑️ Deleting file data from AstraDB: ${filename}`);
+export async function deleteFileFromAstraDB(
+  filename: string,
+  dbid: "data" | "db1" | "db2"
+): Promise<void> {
+  console.log(`🗑️ Deleting file '${filename}' from AstraDB collection '${dbid}'`);
   try {
-    await db.collection("data").deleteMany({
+    await db.collection(dbid).deleteMany({
       "metadata.filename": filename
     });
-    console.log("✅ Successfully deleted file data from AstraDB");
+    console.log(`✅ Successfully deleted file data from '${dbid}' collection`);
   } catch (error) {
     console.error("❌ Error deleting from AstraDB:", error);
     throw error;
@@ -590,26 +608,3 @@ async function testAstraDBConnection() {
 
 // Run the test when this module is loaded
 testAstraDBConnection();
-
-/**
- * Retrieve the most relevant document chunks from AstraDB using vector search
- */
-export async function retrieveRelevantChunks(query: string, topK: number = 5): Promise<string[]> {
-  console.log(`🔍 Searching AstraDB for relevant chunks: "${query}"`);
-
-  try {
-    const results = await db.collection("data").find({
-      $vector: {
-        query: query,
-        path: "content",
-        k: topK,
-      },
-    }).toArray();
-
-    console.log(`✅ Found ${results.length} relevant chunks.`);
-    return results.map((doc) => doc.content);
-  } catch (error) {
-    console.error("❌ Error retrieving relevant chunks:", error);
-    return [];
-  }
-}

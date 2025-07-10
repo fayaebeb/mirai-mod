@@ -1,5 +1,3 @@
-import dotenv from "dotenv";
-dotenv.config();
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
@@ -45,7 +43,7 @@ export function setupAuth(app: Express) {
     store: storage.sessionStore,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      secure: false,
+      secure: true,
       httpOnly: true,
       sameSite: 'strict'
     }

@@ -25,6 +25,20 @@ import React from "react";
 
 interface MessageWithBot extends Omit<Message, 'isBot'> {
   isBot: boolean;
+  username?: string; // username is optional (only on user messages)
+}
+
+function getDbidTag(dbid?: string): { label: string; className: string } {
+  switch (dbid) {
+    case "data":
+      return { label: "うごき統計", className: "bg-pink-200 text-pink-800" };
+    case "db1":
+      return { label: "来た来ぬ統計", className: "bg-blue-200 text-blue-800" };
+    case "db2":
+      return { label: "インバウンド統計", className: "bg-green-200 text-green-800" };
+    default:
+      return { label: dbid || "不明", className: "bg-gray-300 text-gray-700" };
+  }
 }
 
 export default function ChatMessage({ message }: { message: MessageWithBot }) {
@@ -44,7 +58,7 @@ export default function ChatMessage({ message }: { message: MessageWithBot }) {
       if (sessionIdFromURL) {
         queryClient.invalidateQueries({ queryKey: ["/api/messages", sessionIdFromURL] });
       }
-      
+
       toast({
         title: "メッセージを削除しました",
         description: "メッセージが正常に削除されました。",
@@ -69,40 +83,58 @@ export default function ChatMessage({ message }: { message: MessageWithBot }) {
         {message.isBot && (
           <Avatar>
             <img
-              src="/images/mirai.png"
-              alt="Mirai AI"
+              src="/images/sakura-dp.png"
+              alt="sakura AI"
               className="w-full h-full object-cover rounded-full border border-pink-400 shadow-md"
             />
           </Avatar>
         )}
 
-        <Card
-          className={cn(
-            "px-4 py-3 max-w-[80%] rounded-xl relative backdrop-blur-sm bg-opacity-80 border shadow-lg",
-            {
-              "bg-gradient-to-br from-cyan-900 to-blue-800 text-white border-cyan-400": !message.isBot,
-              "bg-gradient-to-br from-indigo-900 to-purple-900 text-white border-purple-500": message.isBot,
-            }
-          )}
-        >
-          <div className="prose prose-invert break-words">
-            {message.isBot ? (
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {message.content}
-              </ReactMarkdown>
-            ) : (
-              <div className="whitespace-pre-wrap">{message.content}</div>
-            )}
-          </div>
+            <Card
+              className={cn("px-4 py-3 max-w-[80%] rounded-lg relative flex flex-col gap-2", {
+                "bg-[#FFB7C5] text-black border border-[#FF98A5] shadow-md": !message.isBot,
+                "bg-gray-100 text-black": message.isBot,
+              })}
+            >
+              <div className="break-words text-black">
+                {message.isBot ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {message.content}
+                  </ReactMarkdown>
+                ) : (
+                  <div className="whitespace-pre-wrap">{message.content}</div>
+                )}
+              </div>
 
-          <div 
-            className={cn(
-              "absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity",
-              {
-                "opacity-40 hover:opacity-100": message.isBot,
-              }
-            )}
-          >
+              <div className="flex justify-end gap-1 mt-2">
+                {message.username && !message.isBot && (
+                  <div className="text-[10px] bg-gray-200 px-2 py-0.5 rounded-full text-gray-600 font-medium shadow-sm">
+                    {message.username.split('@')[0]}
+                  </div>
+                )}
+                {message.dbid && (() => {
+                  const tag = getDbidTag(message.dbid);
+                  return (
+                    <div
+                      className={cn(
+                        "text-[10px] px-2 py-0.5 rounded-full font-semibold shadow-sm",
+                        tag.className
+                      )}
+                    >
+                      {tag.label}
+                    </div>
+                  );
+                })()}
+              </div>
+
+            <div
+              className={cn(
+                "absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity",
+                {
+                  "opacity-40 hover:opacity-100": message.isBot,
+                }
+              )}
+            >
             <AlertDialog>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -119,7 +151,7 @@ export default function ChatMessage({ message }: { message: MessageWithBot }) {
                     </Button>
                   </AlertDialogTrigger>
                 </TooltipTrigger>
-                
+
               </Tooltip>
 
               <AlertDialogContent>

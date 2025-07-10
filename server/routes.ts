@@ -3,17 +3,21 @@ import { createServer, type Server } from "http";
 import { storage, type IStorage } from "./storage";
 import { setupAuth } from "./auth";
 import multer from "multer";
-import { processFile, storeInAstraDB, deleteFileFromAstraDB } from "./file-processor";
+import {
+  processFile,
+  storeInAstraDB,
+  deleteFileFromAstraDB,
+} from "./file-processor";
 import { insertMessageSchema } from "@shared/schema";
 import { DataAPIClient } from "@datastax/astra-db-ts";
 import { ModeratorStorage } from "./ModeratorStorage";
 import userAppInviteTokensRoute from "./api/user-app-invite-tokens";
 
+
 const moderatorStorage = new ModeratorStorage();
 
-
-const client = new DataAPIClient(process.env.ASTRA_API_TOKEN || '');
-const db = client.db(process.env.ASTRA_DB_URL || '');
+const client = new DataAPIClient(process.env.ASTRA_API_TOKEN || "");
+const db = client.db(process.env.ASTRA_DB_URL || "");
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -21,17 +25,18 @@ const upload = multer({
     fileSize: 1 * 1024 * 1024 * 1024, // 1GB limit
   },
   fileFilter: (req, file, cb) => {
-    file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    file.originalname = Buffer.from(file.originalname, "latin1").toString(
+      "utf8",
+    );
     cb(null, true);
-  }
+  },
 });
-
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
   // File Upload Endpoint
-  app.post("/api/upload", upload.array('files', 10), async (req, res) => {
+  app.post("/api/upload", upload.array("files", 10), async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
     const files = req.files as Express.Multer.File[];
@@ -47,11 +52,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       "text/plain",
       "text/csv",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "application/vnd.ms-excel"
+      "application/vnd.ms-excel",
     ];
 
     const userId = req.user!.id;
-    const { sessionId } = req.body;
+    const { sessionId, db } = req.body;
 
     // Process each file and track results
     const results = [];
@@ -62,7 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         results.push({
           filename: file.originalname,
           success: false,
-          error: `Unsupported file type: ${file.mimetype}`
+          error: `Unsupported file type: ${file.mimetype}`,
         });
         continue;
       }
@@ -76,16 +81,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           size: file.size,
           sessionId,
           status: "processing",
+          dbid: db,
         });
 
         results.push({
           filename: file.originalname,
           success: true,
-          fileId: fileRecord.id
+          fileId: fileRecord.id,
         });
 
         // Process file asynchronously
-        processFile(file, sessionId)
+        processFile(file, sessionId, db)
           .then(async () => {
             try {
               await storage.updateFileStatus(fileRecord.id, "completed");
@@ -94,6 +100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 isBot: true,
                 sessionId,
                 fileId: fileRecord.id,
+                dbid: db,
               });
             } catch (storeError) {
               console.error("Error storing in AstraDB:", storeError);
@@ -103,6 +110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 isBot: true,
                 sessionId,
                 fileId: fileRecord.id,
+                dbid: db,
               });
             }
           })
@@ -114,6 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               isBot: true,
               sessionId,
               fileId: fileRecord.id,
+              dbid: db,
             });
           });
       } catch (error) {
@@ -121,7 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         results.push({
           filename: file.originalname,
           success: false,
-          error: "Failed to create file record"
+          error: "Failed to create file record",
         });
       }
     }
@@ -142,28 +151,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: "Invalid request data" });
     }
 
-    const body = result.data;
+    const { content, dbid } = result.data;
 
     try {
       // Save the user message to local DB
       await storage.createMessage(req.user!.id, {
-        content: body.content,
+        content: content,
         isBot: false,
         sessionId: persistentSessionId,
+        dbid: dbid,
       });
 
-      console.log(`Sending request to FastAPI: ${body.content}`);
+      console.log(`Sending request to FastAPI: ${content}`);
 
-      const response = await fetch("https://mapi-on6dq.ondigitalocean.app/mimod", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
+      const response = await fetch(
+        "https://mapi-on6dq.ondigitalocean.app/mimod",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            input: content,
+            session_id: persistentSessionId,
+            db: dbid,
+          }),
         },
-        body: JSON.stringify({
-          input: body.content,
-          session_id: persistentSessionId
-        })
-      });
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -185,6 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         content: formattedResponse,
         isBot: true,
         sessionId: persistentSessionId,
+        dbid: dbid,
       });
 
       res.json(botMessage);
@@ -192,25 +207,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error in chat processing:", error);
       res.status(500).json({
         message: "Failed to process message",
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-  });
-
-  app.get("/api/messages/:sessionId", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-
-    try {
-      const persistentSessionId = req.user!.username.split('@')[0];
-      const messages = await storage.getMessagesByUserAndSession(
-        req.user!.id,
-        persistentSessionId
-      );
-      res.json(messages);
-    } catch (error) {
-      console.error("Error retrieving messages:", error);
-      res.status(500).json({
-        message: "Failed to retrieve messages",
         error: error instanceof Error ? error.message : "Unknown error",
       });
     }
@@ -230,7 +226,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
-
 
   app.get("/api/files", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
@@ -264,27 +259,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if this message belongs to the authenticated user
-      if (message.userId !== req.user!.id) {
+      /*if (message.userId !== req.user!.id) {
         return res.status(403).json({ error: "Permission denied" });
-      }
+      }*/
 
       // If it's a bot message, check for AstraDB content to delete
       if (message.isBot) {
-        // Extract MSGID from content using the correct format
         const msgIdMatch = message.content.match(/MSGID:\s*([a-f0-9-]+)/i);
-        console.log("Extracted MSGID:", msgIdMatch ? msgIdMatch[1] : "Not found");
+        console.log(
+          "Extracted MSGID:",
+          msgIdMatch ? msgIdMatch[1] : "Not found",
+        );
 
         if (msgIdMatch) {
           const astraMessageId = msgIdMatch[1];
-          try {
-            // Delete from AstraDB with proper metadata field
-            await db.collection("data").deleteMany({
-              "metadata.msgid": astraMessageId
-            });
-            console.log(`Successfully deleted message with MSGID ${astraMessageId} from AstraDB`);
-          } catch (astraError) {
-            console.error("Error deleting from AstraDB:", astraError);
-            // Continue with local deletion even if AstraDB deletion fails
+          const dbid = message.dbid;
+
+          const validDbids = ["data", "db1", "db2"] as const;
+
+          if (dbid && validDbids.includes(dbid as any)) {
+            try {
+              await db.collection(dbid).deleteMany({
+                "metadata.msgid": astraMessageId,
+              });
+              console.log(
+                `✅ Successfully deleted message with MSGID ${astraMessageId} from '${dbid}' collection`,
+              );
+            } catch (astraError) {
+              console.error("❌ Error deleting from AstraDB:", astraError);
+            }
+          } else {
+            console.warn(
+              `⚠️ No valid dbid found for message. Skipping AstraDB deletion.`,
+            );
           }
         } else {
           console.log("No MSGID found in message content:", message.content);
@@ -315,28 +322,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Check if file exists and user has permission
       const file = await storage.getFile(fileId);
       if (!file) {
         return res.status(404).json({ error: "File not found" });
       }
 
-      // Verify file ownership
-      //if (file.userId !== req.user!.id) {
-      //  return res.status(403).json({ error: "Permission denied" });
-      //}
-
-      // First delete the vector data from AstraDB
       try {
-        await deleteFileFromAstraDB(file.filename);
+        if (file.dbid === null) {
+          console.warn(
+            `⚠️ File ${file.filename} has no dbid. Skipping AstraDB deletion.`,
+          );
+        } else if (["data", "db1", "db2"].includes(file.dbid)) {
+          await deleteFileFromAstraDB(
+            file.filename,
+            file.dbid as "data" | "db1" | "db2",
+          );
+        } else {
+          console.warn(
+            `⚠️ Unrecognized dbid '${file.dbid}' for file ${file.filename}`,
+          );
+        }
       } catch (astraError) {
         console.error("Error deleting from AstraDB:", astraError);
-        // Continue with PostgreSQL deletion even if AstraDB deletion fails
       }
 
-      // Then delete from PostgreSQL
       const deletedFile = await storage.deleteFile(fileId);
-
       res.json(deletedFile);
     } catch (error) {
       console.error("Error deleting file:", error);
@@ -367,9 +377,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
     try {
-      const { category } = req.query;
+      // const { category } = req.query;
 
       let allMessages = await moderatorStorage.getAllMessages();
+
+      // if (category && category !== "ALL") {
+      //   allMessages = allMessages.filter((msg) => msg.category === category);
+      // }
 
       res.json(allMessages);
     } catch (error) {

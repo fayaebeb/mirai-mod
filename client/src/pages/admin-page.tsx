@@ -75,7 +75,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#f8eee2] to-[#f7e6d5] px-4 py-6 sm:px-6 sm:py-8">
+      <div className="min-h-screen bg-gradient-to-b from-[#fff1f2] via-[#ffeae5] to-[#fff4e6] px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <header className="mb-8">
@@ -116,7 +116,7 @@ export default function AdminPage() {
                 <Button
                   onClick={() => createTokenMutation.mutate()}
                   disabled={createTokenMutation.isPending}
-                  className="w-full sm:w-auto bg-[#16213e] hover:bg-[#253758]"
+                  className="w-full sm:w-auto bg-[#e98a9c] hover:bg-[#f1a3b1] text-white transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {createTokenMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -127,6 +127,7 @@ export default function AdminPage() {
                     </>
                   )}
                 </Button>
+
               </div>
             </div>
 
@@ -175,7 +176,7 @@ export default function AdminPage() {
           </Card>
 
           {/* Admin — Upgrade All Users */}
-          <Card className="p-4 sm:p-6 bg-white/95 backdrop-blur-sm shadow-md rounded-xl border-0">
+          {/* <Card className="p-4 sm:p-6 bg-white/95 backdrop-blur-sm shadow-md rounded-xl border-0">
             <h2 className="text-xl sm:text-2xl font-semibold text-[#16213e] mb-4">
               管理者ツール
             </h2>
@@ -210,12 +211,13 @@ export default function AdminPage() {
                       });
                     });
                 }}
-                className="w-full bg-[#16213e] hover:bg-[#253758]"
+                className="w-full bg-[#f296a8] hover:bg-[#f8b5c1] text-white transition-colors duration-200"
               >
                 すべてのユーザーを管理者に設定する
               </Button>
+
             </div>
-          </Card>
+          </Card> */}
         </div>
       </div>
     </div>

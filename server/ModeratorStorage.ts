@@ -1,14 +1,20 @@
-import { desc, eq } from "drizzle-orm";
+//server/ModeratorStorage.ts
+
+import { eq, desc } from "drizzle-orm";
 import { moderatorDb } from "./moderatorDb";
-import { feedback, Feedback, inviteTokens, messages, type Message } from "@shared/moderatorSchema";
-import { InviteToken } from "@shared/schema";
+import {
+  messages,
+  feedback,
+  inviteTokens,
+  type Message,
+  type Feedback,
+  type InviteToken,
+} from "@shared/moderatorSchema";
 import { randomBytes } from "crypto";
 
 export class ModeratorStorage {
-  /**
-   * Retrieves all unique session IDs from the messages table.
-   * This is used to populate the moderator dashboard session list.
-   */
+  // ─── Session / Messages ────────────────────────────
+
   async getAllSessionIds(): Promise<string[]> {
     const results = await moderatorDb
       .select({ sessionId: messages.sessionId })
@@ -17,9 +23,8 @@ export class ModeratorStorage {
       .orderBy(messages.sessionId);
 
     return results
-    .map(row => row.sessionId)
-    .filter((id): id is string => id !== null);
-
+      .map((row) => row.sessionId)
+      .filter((id): id is string => id !== null);
   }
 
   async getAllMessages(): Promise<Message[]> {
@@ -29,12 +34,6 @@ export class ModeratorStorage {
       .orderBy(messages.timestamp);
   }
 
-  /**
-   * Retrieves all messages for a specific session ID, ordered by timestamp.
-   * This enables moderators to view the full chronological history of a session.
-   * 
-   * @param sessionId - The session ID for which to fetch messages.
-   */
   async getMessagesBySessionId(sessionId: string): Promise<Message[]> {
     return await moderatorDb
       .select()
@@ -67,7 +66,6 @@ export class ModeratorStorage {
       .where(eq(feedback.userId, userId))
       .orderBy(feedback.createdAt);
   }
-
 
   // ─── Invite Tokens ─────────────────────────────────
 
