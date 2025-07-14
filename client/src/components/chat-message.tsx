@@ -59,6 +59,7 @@ export default function ChatMessage({ message }: { message: MessageWithBot }) {
         queryClient.invalidateQueries({ queryKey: ["/api/messages", sessionIdFromURL] });
       }
 
+
       toast({
         title: "メッセージを削除しました",
         description: "メッセージが正常に削除されました。",
@@ -112,6 +113,7 @@ export default function ChatMessage({ message }: { message: MessageWithBot }) {
                     
                   </AlertDialogTrigger>
                 </TooltipTrigger>
+
 
               </Tooltip>
 
