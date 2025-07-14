@@ -364,7 +364,7 @@ export default function ModeratorDashboard() {
                   />
                 </div>
               ) : (
-                <div className="">
+                <div className="space-y-1">
                   {filteredUsers?.map((u) => (
                     <Button
                       key={u.id}
@@ -410,7 +410,7 @@ export default function ModeratorDashboard() {
                       </div>
                     ) : (
 
-                      <div className="">
+                      <div className="space-y-1">
                         {chats?.map((c) => (
                           <Button
                             key={c.id}
