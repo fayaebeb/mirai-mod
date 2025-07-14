@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Card,
@@ -8,17 +8,29 @@ import {
   CardTitle,
   CardFooter
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Message } from "@shared/moderatorSchema";
-import { ArrowLeft, UserIcon, SearchIcon, MessageSquare, Users, Shield, Filter, Tag, ClipboardList, Menu, Home, SquareMinus } from "lucide-react";
+import { User, Chat, Message } from "@shared/moderatorSchema";
+import {
+  ArrowLeft,
+  Users,
+  MessageSquare,
+  Shield,
+  Menu
+} from "lucide-react";
 import { useLocation } from "wouter";
 import ChatMsg from "@/components/chat-msg";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useRef } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,73 +39,89 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Mirage } from "ldrs/react";
+import 'ldrs/react/Mirage.css'
 
-// Category options
-// const CATEGORIES = {
-//   ALL: "すべて",
-//   ADMINISTRATIVE: "行政",
-//   PRIVATE: "民間",
-//   SELF: "自分"
-// };
-
-// type CategoryType = keyof typeof CATEGORIES | "ALL";
 
 export default function ModeratorDashboard() {
-  const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  // const [selectedCategory, setSelectedCategory] = useState<CategoryType | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
+  const [userSearch, setUserSearch] = useState("");
+  const [loadAllMessages, setLoadAllMessages] = useState(false);
   const { toast } = useToast();
   const [_, setLocation] = useLocation();
   const isMobile = useIsMobile();
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
+  // 1️⃣ All messages (for the “no user selected” view)
   const {
     data: allMessages,
-    isLoading: isLoadingAllMessages,
+    isLoading: loadingAllMessages,
     error: allMessagesError
   } = useQuery({
-    queryKey: ["/api/moderator/messages"],
+    queryKey: ["/api/moderator/messages/all"],
     queryFn: async () => {
-      const res = await fetch("/api/moderator/messages");
+      const res = await fetch("/api/moderator/messages/all");
       if (!res.ok) throw new Error("Failed to fetch all messages");
-      return res.json();
+      return (await res.json()) as Message[];
     },
-    enabled: !selectedSessionId,
-    retry: 1
+    enabled: loadAllMessages && selectedUserId === null
   });
 
-
-  // Query to fetch all session IDs (usernames)
+  // 2️⃣ Users list
   const {
-    data: sessionIds,
-    isLoading: isLoadingSessionIds,
-    error: sessionIdsError
+    data: users,
+    isLoading: loadingUsers,
+    error: usersError
   } = useQuery({
-    queryKey: ["/api/moderator/sessions"],
+    queryKey: ["/api/moderator/users"],
     queryFn: async () => {
-      const res = await fetch("/api/moderator/sessions");
-      if (!res.ok) throw new Error("Failed to fetch sessions");
-      return res.json();
+      const res = await fetch("/api/moderator/users");
+      if (!res.ok) throw new Error("Failed to fetch users");
+      return (await res.json()) as User[];
     },
-    retry: 1
   });
 
-  // Query to fetch messages for the selected session
+  // 3️⃣ Chats for the selected user
   const {
-    data: messages,
-    isLoading: isLoadingMessages,
-    error: messagesError
+    data: chats,
+    isLoading: loadingChats,
+    error: chatsError
   } = useQuery({
-    queryKey: ["/api/moderator/messages", selectedSessionId],
+    queryKey: ["/api/moderator/users", selectedUserId, "chats"],
     queryFn: async () => {
-      const res = await fetch(`/api/moderator/messages/${selectedSessionId}`);
+      const res = await fetch(
+        `/api/moderator/users/${selectedUserId}/chats`
+      );
+      if (!res.ok) throw new Error("Failed to fetch chats");
+      return (await res.json()) as Chat[];
+    },
+    enabled: selectedUserId !== null,
+  });
+
+  // 4️⃣ Messages for the selected chat
+  const {
+    data: chatMessages,
+    isLoading: loadingChatMessages,
+    error: chatMessagesError
+  } = useQuery({
+    queryKey: ["/api/moderator/chats", selectedChatId, "messages"],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/moderator/chats/${selectedChatId}/messages`
+      );
       if (!res.ok) throw new Error("Failed to fetch messages");
-      return res.json();
+      return (await res.json()) as Message[];
     },
-    enabled: !!selectedSessionId,
-    retry: 1
+    enabled: selectedChatId !== null,
   });
 
+  // Reset chat selection when user changes
+  useEffect(() => {
+    setSelectedChatId(null);
+  }, [selectedUserId]);
+
+  // Error toasts
   useEffect(() => {
     if (allMessagesError) {
       toast({
@@ -102,480 +130,363 @@ export default function ModeratorDashboard() {
           allMessagesError instanceof Error
             ? allMessagesError.message
             : "Unknown error",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
-  }, [allMessagesError, toast]);
-
-  // Filter sessions by search term
-  const activeMessages = selectedSessionId ? messages : allMessages;
-
-  // const filteredMessages = activeMessages?.filter((message: Message) => {
-  //   if (selectedCategory === null) return false; // Show nothing
-  //   if (selectedCategory === "ALL") return true;
-  // });
-
-  // useLayoutEffect(() => {
-  //   if (!bottomRef.current) return;
-  //   const timeout = setTimeout(() => {
-  //     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  //   }, 100);
-  //   return () => clearTimeout(timeout);
-  // }, [filteredMessages?.length]);
-
-  useEffect(() => {
-    if (sessionIdsError) {
+    if (usersError) {
       toast({
-        title: "Error fetching sessions",
+        title: "Error fetching users",
         description:
-          sessionIdsError instanceof Error
-            ? sessionIdsError.message
-            : "Unknown error",
-        variant: "destructive"
+          usersError instanceof Error ? usersError.message : "Unknown error",
+        variant: "destructive",
       });
     }
-
-    if (messagesError) {
+    if (chatsError) {
       toast({
-        title: "Error fetching messages",
+        title: "Error fetching chats",
         description:
-          messagesError instanceof Error
-            ? messagesError.message
-            : "Unknown error",
-        variant: "destructive"
+          chatsError instanceof Error ? chatsError.message : "Unknown error",
+        variant: "destructive",
       });
     }
-  }, [sessionIdsError, messagesError, toast]);
-
-
-  const formatTimestamp = (timestamp: string) => {
-    const rtf = new Intl.RelativeTimeFormat('ja', { numeric: 'auto' });
-    const now = Date.now();
-    const then = new Date(timestamp).getTime();
-    const diffInSeconds = Math.floor((then - now) / 1000);
-
-    const divisions = [
-      { amount: 60, unit: 'seconds' },
-      { amount: 60, unit: 'minutes' },
-      { amount: 24, unit: 'hours' },
-      { amount: 7, unit: 'days' },
-      { amount: 4.34524, unit: 'weeks' },
-      { amount: 12, unit: 'months' },
-      { amount: Number.POSITIVE_INFINITY, unit: 'years' },
-    ];
-
-    let unitIndex = 0;
-    let delta = diffInSeconds;
-
-    for (const division of divisions) {
-      if (Math.abs(delta) < division.amount) {
-        return rtf.format(Math.round(delta), division.unit.slice(0, -1) as Intl.RelativeTimeFormatUnit);
-      }
-      delta /= division.amount;
-      unitIndex++;
+    if (chatMessagesError) {
+      toast({
+        title: "Error fetching chat messages",
+        description:
+          chatMessagesError instanceof Error
+            ? chatMessagesError.message
+            : "Unknown error",
+        variant: "destructive",
+      });
     }
+  }, [allMessagesError, usersError, chatsError, chatMessagesError, toast]);
 
-    return rtf.format(Math.round(delta), 'year');
-  };
+  // Auto‐scroll to bottom on new messages
+  useLayoutEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [
+    allMessages?.length,
+    chatMessages?.length
+  ]);
 
-
-  
-
-  // Filter sessions by search term
-  const filteredSessions = sessionIds?.filter((id: string) =>
-    id.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter users by search term
+  const filteredUsers = users?.filter((u) =>
+    u.username.toLowerCase().includes(userSearch.toLowerCase())
   );
 
+  // Decide which messages to show in the right panel
+  const activeMessages =
+    selectedChatId !== null
+      ? chatMessages
+      : selectedUserId === null
+        ? allMessages
+        : null;
 
   return (
-        <div className="min-h-screen bg-gradient-to-br from-[#fff1f2] via-[#ffeae5] to-[#fff4e6]">
-              <div className="container mx-auto px-4 py-6">
-                {/* Enhanced Header Section with Navigation */}
-                <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 bg-gradient-to-r from-[#ffe9ec] via-[#ffe0d3] to-transparent p-4 rounded-xl shadow-sm">
-                  {/* Back Button with Hover Effect */}
+    <div className=" h-full md:h-screen flex items-center justify-between bg-gradient-to-br bg-black  md:overflow-hidden">
+      <div className=" h-full flex flex-col mx-auto p-5 space-y-5  max-w-[90rem] w-full">
+        {/* Header & Navigation */}
+        <div className=" relative flex flex-col md:flex-row md:items-center md:justify-between gap-4  bg-noble-black-900 border border-noble-black-800 px-2 py-1 md:p-4 rounded-xl shadow-sm md:h-fit ">
+          <Button
+            variant="ghost"
+            onClick={() => setLocation("/")}
+            className="hidden md:flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-black text-noble-black-100 border border-noble-black-800 hover:bg-noble-black-100 hover:text-noble-black-900  hover:shadow-md transition-all duration-300 "
+          >
+            <ArrowLeft className="h-4 w-4 " />
+            <span className="font-medium">ホームに戻る</span>
+          </Button>
+
+          <div className="hidden md:flex items-center gap-3">
+            <Badge
+              variant="outline"
+              className="px-3 py-1.5 text-sm font-medium inline-flex items-center bg-black text-noble-black-100 border border-noble-black-800 hover:bg-noble-black-100 hover:text-noble-black-900"
+            >
+              <Shield className="w-4 h-4 mr-1.5 " />
+              モデレーター専用
+            </Badge>
+            <Button
+              onClick={() => setLocation("/feedback")}
+              className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-indigo-700  to-violet-950 shadow-lg transition-all duration-300 hover:opacity-90"
+            >
+              フィードバックを管理
+            </Button>
+          </div>
+
+          {isMobile && (
+            <div className="md:hidden flex justify-between items-center w-full">
+              <Button
+                variant="ghost"
+                onClick={() => setLocation("/")}
+                className="flex items-center gap-1 px-3 py-2 text-sm rounded-full  text-noble-black-100 hover:shadow-md transition-all duration-300"
+              >
+                <ArrowLeft className="h-4 w-4 " />
+                <span className="">戻る</span>
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    onClick={() => setLocation("/")}
-                    className="hidden md:flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-white/80 hover:bg-white hover:shadow-md transition-all duration-300 border border-[#f5cfd4]"
+                    size="icon"
+                    className=" text-noble-black-100 hover:shadow-md transition-all duration-300"
                   >
-                    <ArrowLeft className="h-4 w-4 text-primary" />
-                    <span className="font-medium">ホームに戻る</span>
+                    <Menu className="w-5 h-5 " />
                   </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 p-2 rounded-xl shadow-lg border "
+                >
+                  <DropdownMenuLabel className="flex items-center gap-2 ">
+                    <Shield className="w-4 h-4" />
+                    モデレーターメニュー
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => setLocation("/")}
+                    className="gap-2 rounded-lg hover:bg-primary/10 my-1 p-2"
+                  >
+                    ホームに戻る
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setLocation("/feedback")}
+                    className="gap-2 rounded-lg hover:bg-primary/10 my-1 p-2"
+                  >
+                    フィードバックを管理
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
+        </div>
 
-                  {/* Desktop: Enhanced Navigation Buttons */}
-                  <div className="hidden md:flex items-center gap-3">
-                    <Badge variant="outline" className="px-3 py-1.5 text-sm font-medium inline-flex items-center bg-[#fff4f5]/80 border border-[#f5cfd4]">
-                      <Shield className="w-4 h-4 mr-1.5 text-primary" />
-                      モデレーター専用
-                    </Badge>
+        {/* Dashboard Stats */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between space-y-5  md:space-y-0 h-fit">
+          <div className="flex space-x-4 items-center ">
+            <Shield className="h-8 w-8 text-noble-black-100" />
+            <div>
+              <h1 className="text-xl md:text-2xl font-bold text-noble-black-100">
+                モデレーターダッシュボード
+              </h1>
+              <p className="text-sm text-noble-black-400">
+                ユーザー → チャット → メッセージ 管理
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center justify-center md:justify-end space-x-4  ">
+            <div className="flex space-x-2  bg-black border border-noble-black-800 text-noble-black-100   rounded-2xl shadow-sm">
+              <div className="flex items-center space-x-2 px-4 py-3">
+                <Users className="h-5 w-5  " />
 
-                    <Button
-                      onClick={() => setLocation("/feedback")}
-                      className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 shadow-lg transition-all duration-300 hover:opacity-90"
-                    >
-                      <ClipboardList className="h-5 w-5 text-white" />
-                      <span>フィードバックを管理</span>
-                    </Button>
+                <div className="text-xs text-text-noble-black-100">ユーザー</div>
 
+              </div>
+              <div className="font-semibold px-3 py-2 bg-noble-black-900 rounded-r-2xl">{filteredUsers?.length || 0}</div>
+            </div>
 
-                  </div>
+            <div className="flex  space-x-2  bg-black border border-noble-black-800 text-noble-black-100   rounded-2xl shadow-sm">
+              <div className="flex items-center space-x-2 px-4 py-3">
+                <MessageSquare className="h-5 w-5  " />
 
-                  {/* Mobile: Enhanced Dropdown Menu */}
-                  {/* Mobile: Back Button + Dropdown Menu on same row */}
-                  <div className="md:hidden flex justify-between items-center w-full px-2 absolute top-2 left-0 right-0">
-                    {/* Mobile Back Button */}
-                    <Button
-                      variant="ghost"
-                      onClick={() => setLocation("/")}
-                      className="flex items-center gap-1 px-3 py-2 text-sm rounded-full bg-white/90 hover:bg-white border border-[#f5cfd4] hover:shadow-md transition-all duration-300"
-                    >
-                      <ArrowLeft className="h-4 w-4 text-primary" />
-                      <span className="text-primary">戻る</span>
-                    </Button>
+                <div className="text-xs text-text-noble-black-100">チャット</div>
 
-                    {/* Mobile Dropdown Menu */}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="rounded-full bg-white/90 hover:bg-white border border-[#f5cfd4] hover:shadow-md transition-all duration-300">
-                          <Menu className="w-5 h-5 text-primary" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl shadow-lg border border-[#f5cfd4]">
-                        <DropdownMenuLabel className="flex items-center gap-2 text-primary">
-                          <Shield className="w-4 h-4" />
-                          モデレーターメニュー
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="gap-2 rounded-lg hover:bg-primary/10 cursor-pointer my-1 p-2"
-                          onClick={() => setLocation("/")}
-                        >
-                          <Home className="w-4 h-4 text-primary" />
-                          ホームに戻る
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="gap-2 rounded-lg hover:bg-primary/10 cursor-pointer my-1 p-2"
-                          onClick={() => setLocation("/feedback")}
-                        >
-                          <ClipboardList className="w-4 h-4 text-primary" />
-                          フィードバックを管理
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+              </div>
+              <div className="font-semibold px-3 py-2 bg-noble-black-900 rounded-r-2xl">{chats?.length || 0}</div>
+            </div>
+          </div>
+        </div>
 
-                </div>
+        <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden items-center justify-center space-y-5 md:space-y-0 md:space-x-5">
 
-                {/* Enhanced Dashboard Title */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 w-full overflow-hidden">
-                  <div className="flex items-center">
-                    <div className="relative mr-4">
-                      <div className="absolute -inset-1 bg-gradient-to-r from-[#f7bfc6] to-[#fddde6] rounded-full blur-sm opacity-70"></div>
-                      <div className="relative bg-[#fff4f5] p-2 rounded-full shadow-md">
-                        <Shield className="h-8 w-8 text-[#c55a6a]" />
-                      </div>
-                    </div>
-                    <div>
-                      <h1 className="text-[clamp(1.5rem,5vw,2rem)] font-bold text-[#b35a68] flex items-center gap-2 whitespace-nowrap">
-                        モデレーターダッシュボード
-                      </h1>
-                      <p className="text-sm text-[#b56a78] mt-1 hidden md:block">
-                        モデレーターコントロールパネル・メッセージの管理
-                      </p>
-                    </div>
-                  </div>
+          {isMobile && (
+            <div className="space-y-4 w-full">
+              {/* User Selector */}
+              <Select
+                onValueChange={(val) => setSelectedUserId(Number(val))}
+                value={selectedUserId?.toString() || ""}
+              >
+                <SelectTrigger className="w-full bg-black text-noble-black-100 border border-noble-black-800 rounded-2xl">
+                  <SelectValue placeholder="ユーザーを選択..." />
+                </SelectTrigger>
+                <SelectContent className="bg-noble-black-900 border border-noble-black-800 text-noble-black-100 rounded-2xl">
+                  {users?.map((u) => (
+                    <SelectItem key={u.id} value={u.id.toString()}>
+                      {u.username}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-                  <div className="flex mt-4 md:mt-0 items-center bg-white border border-[#f5cfd4] px-4 py-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
-                    <div className="flex items-center mr-4">
-                      <div className="p-1.5 bg-primary/10 rounded-full mr-2">
-                        <Users className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <span className="text-xs text-[#b56a78] block">ユーザー</span>
-                        <span className="text-base font-semibold">{filteredSessions?.length || 0}</span>
-                      </div>
-                    </div>
+              {/* Chat Selector */}
+              <Select
+                onValueChange={(val) => setSelectedChatId(Number(val))}
+                value={selectedChatId?.toString() || ""}
+                disabled={!selectedUserId || !chats?.length}
+              >
+                <SelectTrigger className="w-full bg-black text-noble-black-100 border border-noble-black-800 rounded-2xl" >
+                  <SelectValue placeholder="チャットを選択..." />
+                </SelectTrigger>
+                <SelectContent className="bg-noble-black-900 text-noble-black-100">
+                  {chats?.map((c) => (
+                    <SelectItem key={c.id} value={c.id.toString()}>
+                      {c.title ? (c.title.length > 15 ? `${c.title.slice(0, 15)}...` : c.title) : `Chat #${c.id}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
-                    <div className="h-10 w-[1px] bg-muted mx-2"></div>
-
-                    <div className="flex items-center">
-                      <div className="p-1.5 bg-primary/10 rounded-full mr-2">
-                        <MessageSquare className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <span className="text-xs text-[#b56a78] block">メッセージ</span>
-                        <span className="text-base font-semibold">{messages?.length || 0}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* User List */}
-          <Card className="md:col-span-4 border-0 shadow-md ">
-            <CardHeader className="bg-[#ffe9ec]/30 border-b">
+          {/* ─── Users Panel */}
+          <Card className="hidden md:flex shadow-md  flex-col h-[80rem] md:h-full overflow-hidden md:w-1/5 border-noble-black-800 rounded-2xl bg-noble-black-900 text-noble-black-100">
+            <CardHeader className="bg-black border-noble-black-800 border-b rounded-t-2xl text-noble-black-100">
               <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                ユーザー一覧
+                <Users className="h-5 w-5" /> ユーザー一覧
               </CardTitle>
-              <CardDescription className="hidden sm:block">
-                チャット履歴を表示するには、ユーザーを選択してください
-              </CardDescription>
+              <CardDescription>ユーザーを選択してください</CardDescription>
             </CardHeader>
-            <CardContent className="p-4">
-              <div className="relative mb-4">
-                <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[#b56a78]" />
+            <CardContent className="p-4 space-y-2 bg-noble-black-900 flex-1 overflow-y-auto ">
+              <div className="relative ">
                 <Input
-                  type="text"
-                  placeholder="ユーザーを検索..."
-                  className="pl-9 w-full rounded-md border"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="ユーザー検索…"
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  className="bg-black text-noble-black-100 border border-noble-black-800"
                 />
               </div>
-              {isLoadingSessionIds ? (
-                <div className="flex justify-center items-center p-8">
-                  <div className="animate-pulse flex flex-col items-center">
-                    <Users className="h-8 w-8 text-muted mb-2" />
-                    <p className="text-[#b56a78]">ユーザーを読み込み中...</p>
-                  </div>
+              {loadingUsers ? (
+                <div className="flex justify-center items-center h-full p-8">
+                  <Mirage
+                    size="60"
+                    speed="2.5"
+                    color="#f2f2f2"
+                  />
                 </div>
-              ) : filteredSessions && filteredSessions.length > 0 ? (
-                <ScrollArea className="h-[calc(100vh-300px)] pr-2">
-                  <div className="space-y-2">
-                    {filteredSessions.map((sessionId: string) => (
-                      <Button
-                        key={sessionId}
-                        variant={selectedSessionId === sessionId ? "secondary" : "ghost"}
-                        className={`w-full justify-start text-left rounded-lg transition-all ${
-                          selectedSessionId === sessionId 
-                            ? "bg-primary/10 border border-[#f5cfd4] shadow-sm" 
-                            : "hover:bg-muted"
-                        }`}
-                        onClick={() =>
-                          setSelectedSessionId((prev) =>
-                            prev === sessionId ? null : sessionId
-                          )
-                        }
-                      >
-                        <div className="flex items-center">
-                          <UserIcon className="h-4 w-4 mr-2 flex-shrink-0" />
-                          <span className="truncate">{sessionId}</span>
-                        </div>
-                      </Button>
-                    ))}
-                    <div ref={bottomRef} />
-                  </div>
-                </ScrollArea>
               ) : (
-                <div className="flex flex-col items-center justify-center p-8 text-center border border-dashed rounded-lg">
-                  <Users className="h-8 w-8 text-[#b56a78] mb-2" />
-                  <p className="text-[#b56a78]">ユーザーが見つかりませんでした</p>
+                <div className="">
+                  {filteredUsers?.map((u) => (
+                    <Button
+                      key={u.id}
+                      variant={u.id === selectedUserId ? "secondary" : "ghost"}
+                      className="w-full justify-start"
+                      onClick={() => setSelectedUserId(u.id)}
+                    >
+                      {u.username}
+                    </Button>
+                  ))}
                 </div>
               )}
             </CardContent>
-            {filteredSessions && filteredSessions.length > 0 && (
-              <CardFooter className="bg-[#ffe9ec]/30 border-t px-4 py-1">
-                <p className="text-xs text-[#b56a78] w-full text-center">
-                  {filteredSessions.length}人のユーザーが見つかりました
-                </p>
-              </CardFooter>
-            )}
           </Card>
 
-              <Card className="md:col-span-8 border-0 shadow-md flex flex-col h-[calc(100vh-100px)]">
-              <CardHeader className="bg-[#ffe9ec]/30 border-b">
-                <div className="flex flex-col gap-4 w-full">
-                  {/* Top section: Title and User Info */}
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 w-full">
-                    <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 w-full">
-                      <div className="flex items-center gap-2">
-                        <MessageSquare className="h-5 w-5 shrink-0" />
-                        <span className="text-lg font-semibold">チャット履歴</span>
+          {/* ─── Chats Panel */}
+          <Card className="hidden shadow-md md:w-1/5 w-full md:flex flex-col md:h-full overflow-hidden border-noble-black-800 rounded-2xl bg-noble-black-900 text-noble-black-100">
+            <CardHeader className="bg-black border-noble-black-800 border-b rounded-t-2xl text-noble-black-100">
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" /> チャット一覧
+              </CardTitle>
+              <CardDescription>
+                {selectedUserId
+                  ? "チャットを選択してください"
+                  : "ユーザーを先に選択"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-4 space-y-2 flex-1 overflow-y-auto overflow-x-hidden bg-noble-black-900">
+              {selectedUserId ? (
+                loadingChats ? (
+                  <div className="flex justify-center items-center h-full p-8">
+                    <Mirage
+                      size="60"
+                      speed="2.5"
+                      color="#f2f2f2"
+                    />
+                  </div>
+                ) : (
+                  <>
+                    {chats?.length === 0 ? (
+                      <div className="p-8 text-center h-full items-center justify-center flex  text-sm text-noble-black-100">
+                        このユーザーにはチャットがありません
                       </div>
+                    ) : (
 
-                      {/* User Info and Clear Button */}
-                      {selectedSessionId && (
-                        <div className="flex flex-wrap items-center gap-2 mt-1 sm:mt-0">
-                          <Badge
-                            variant="secondary"
-                            className="px-3 py-1 text-sm h-auto flex items-center gap-1 bg-[#ffe9ec] text-[#c55a6a] border border-[#f5cfd4] shrink-0"
-                          >
-                            <UserIcon className="w-5 h-5 text-[#c55a6a]" />
-                            <span>{selectedSessionId}</span>
-                          </Badge>
+                      <div className="">
+                        {chats?.map((c) => (
                           <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSelectedSessionId(null)}
-                            className="text-sm text-[#b56a78] hover:text-primary px-2 py-1"
+                            key={c.id}
+                            variant={c.id === selectedChatId ? "secondary" : "ghost"}
+                            className="w-full justify-start overflow-hidden "
+                            onClick={() => setSelectedChatId(c.id)}
                           >
-                            <SquareMinus className="h-4 w-4 mr-1" />
-                            ユーザー選択を解除
+                            {c.title ? (c.title.length > 15 ? `${c.title.slice(0, 15)}...` : c.title) : `Chat #${c.id}`}
                           </Button>
-                        </div>
-                      )}
-                    </CardTitle>
-                  </div>
-
-                  {/* Category Filters */}
-                  <div className="overflow-x-auto">
-                    <div className="flex items-center gap-2 min-w-max">
-                      <div className="hidden sm:flex items-center shrink-0">
-                        <Filter className="h-4 w-4 mr-1 text-[#b56a78]" />
-                        <span className="text-xs text-[#b56a78]">カテゴリー:</span>
+                        ))}
                       </div>
-                      {/* {(Object.keys(CATEGORIES) as CategoryType[]).map((cat) => (
-                        <Badge
-                          key={cat}
-                          variant={
-                            selectedCategory === cat
-                              ? cat === "ALL"
-                                ? "default"
-                                : cat === "ADMINISTRATIVE"
-                                ? "destructive"
-                                : cat === "PRIVATE"
-                                ? "secondary"
-                                : "default"
-                              : "outline"
-                          }
-                          className={`px-2 py-1 flex items-center cursor-pointer transition-all hover:shadow whitespace-nowrap ${
-                            selectedCategory === cat
-                              
-                            ? cat === "ADMINISTRATIVE"
-                                ? "bg-red-100 text-red-700 border-red-300"
-                                : cat === "PRIVATE"
-                                ? "bg-blue-100 text-blue-700 border-blue-300"
-                                : cat === "SELF"
-                                ? "bg-green-100 text-green-700 border-green-300"
-                                : ""
-                              : ""
-                          }`}
-                          onClick={() =>
-                            setSelectedCategory((prev) =>
-                              prev === cat ? null : cat
-                            )
-                          }
-                        >
-                          <Tag className="h-3 w-3 mr-1" />
-                          {CATEGORIES[cat]}
-                        </Badge>
-                      ))} */}
-                    </div>
-                  </div>
+                    )}
 
-
-                  {!selectedSessionId && (
-                    <CardDescription className="hidden sm:block">
-                      左側のユーザー一覧から選択して、チャット履歴を表示してください
-                    </CardDescription>
-                  )}
+                  </>
+                )
+              ) : (
+                <div className="p-8 text-center h-full items-center justify-center flex  text-sm text-noble-black-100">
+                  ユーザーを選択してください
                 </div>
-              </CardHeader>
+              )}
+            </CardContent>
+          </Card>
 
-
-            <CardContent className="p-4 flex-1 overflow-hidden">
-            {!selectedSessionId ? (
-              activeMessages && activeMessages.length > 0 ? (
-                <ScrollArea className="h-full pr-2">
+          {/* ─── Messages Panel */}
+          <Card className="shadow-md md:w-3/5 w-full  h-[40rem] md:h-full flex flex-col  overflow-hidden border-noble-black-800 rounded-2xl bg-noble-black-900 text-noble-black-100 ">
+            <CardHeader className="bg-black border-noble-black-800 border-b rounded-t-2xl text-noble-black-100">
+              <CardTitle className="text-noble-black-100 flex items-center gap-2">
+                メッセージ履歴
+              </CardTitle>
+              <CardDescription className="">
+                {selectedChatId
+                  ? `Chat #${selectedChatId}`
+                  : selectedUserId
+                    ? "チャットを選択してください"
+                    : loadAllMessages
+                      ? "全メッセージを表示中"
+                      : "全メッセージを読み込むには下のボタンをクリック"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className=" md:p-4  flex-1 overflow-y-auto">
+              {!selectedUserId && !selectedChatId && !loadAllMessages ? (
+                <div className="flex justify-center items-center h-full">
+                  <Button className="bg-black text-noble-black-100 border border-noble-black-800 hover:bg-noble-black-100 hover:text-noble-black-900" onClick={() => setLoadAllMessages(true)}>
+                    全メッセージを読み込む
+                  </Button>
+                </div>
+              ) : selectedUserId && selectedChatId && loadingChatMessages ? (
+                <div className="flex justify-center items-center h-full p-8">
+                  <Mirage
+                    size="60"
+                    speed="2.5"
+                    color="#f2f2f2"
+                  />
+                </div>
+              ) : activeMessages  && activeMessages.length > 0 ? (
+                <div className=" md:pr-2">
                   <div className="space-y-4">
-                    {activeMessages.map((message: Message) => (
-                      <div key={message.id} className="group relative">
-                        <ChatMsg message={message} />
+                    {activeMessages.map((msg) => (
+                      <div key={msg.id} className=" ">
+                        <ChatMsg message={msg} />
                       </div>
                     ))}
                     <div ref={bottomRef} />
                   </div>
-                </ScrollArea>
+                </div>
+              ) : selectedChatId && activeMessages && activeMessages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-sm text-noble-black-100">
+                  メッセージがありません
+                </div>
               ) : (
-                  <div className="flex flex-col items-center justify-center h-full border rounded-lg border-dashed">
-                    <MessageSquare className="h-12 w-12 text-[#c8828d]/50 mb-4" />
-                    {/* <p className="text-[#b56a78] mb-2">
-                      {selectedCategory === null ? (
-                        "メッセージは表示されていません"
-                      ) : selectedCategory === "ALL" ? (
-                        "チャット履歴を表示するには、ユーザーを選択してください"
-                      ) : (
-                        // `カテゴリ「${CATEGORIES[selectedCategory]}」のメッセージが見つかりませんでした`
-                        `カテゴリのメッセージが見つかりませんでした`
-                      )}
-                    </p> */}
-                  {/* {selectedCategory !== "ALL" && (
-                    <Badge
-                      variant="outline"
-                      className="mt-2 cursor-pointer"
-                      onClick={() => setSelectedCategory("ALL")}
-                    >
-                      <Tag className="h-3 w-3 mr-1" />
-                      すべてのメッセージを表示
-                    </Badge>
-                  )} */}
+                <div className="flex flex-col items-center justify-center h-full text-sm text-noble-black-100">
+                  チャットを選択してください
                 </div>
-              )
-            ) : isLoadingMessages ? (
-              <div className="flex justify-center items-center p-8 h-full">
-                <div className="animate-pulse flex flex-col items-center">
-                  <MessageSquare className="h-8 w-8 text-muted mb-2" />
-                  <p className="text-[#b56a78]">メッセージを読み込み中...</p>
-                </div>
-              </div>
-            ) : activeMessages && activeMessages.length > 0 ? (
-              <ScrollArea className="h-full pr-2">
-                <div className="space-y-4">
-                  {activeMessages.map((message: Message) => (
-                    <div key={message.id} className="group relative">
-                      <ChatMsg message={message} />
-                      <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </div>
-                  ))}
-                  <div ref={bottomRef} />
-                </div>
-              </ScrollArea>
-            ) : messages && messages.length > 0 ? (
-              <div className="flex flex-col items-center justify-center h-full border rounded-lg border-dashed">
-                <Filter className="h-10 w-10 text-[#c8828d]/50 mb-3" />
-                <p className="text-[#b56a78] mb-2">選択したカテゴリーのメッセージが見つかりませんでした</p>
-                <Badge
-                  variant="outline"
-                  className="mt-2 cursor-pointer"
-                  // onClick={() => setSelectedCategory("ALL")}
-                >
-                  <Tag className="h-3 w-3 mr-1" />
-                  すべてのメッセージを表示
-                </Badge>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full border rounded-lg border-dashed">
-                <MessageSquare className="h-12 w-12 text-[#c8828d]/50 mb-4" />
-                <p className="text-[#b56a78]">このユーザーのメッセージが見つかりませんでした</p>
-              </div>
-            )}
-
-              {selectedSessionId && activeMessages && activeMessages.length > 0 && (
-                <CardFooter className="bg-[#ffe9ec]/30 border-t px-4 py-2 text-[11px] sm:text-xs text-[#b56a78] min-h-[40px] overflow-x-auto">
-                  <div className="flex items-center gap-4 min-w-max">
-                    <span className="whitespace-nowrap">
-                      最初のメッセージ: {formatTimestamp(activeMessages[0].timestamp.toString())}
-                    </span>
-                    <span className="whitespace-nowrap">
-                      最新のメッセージ: {formatTimestamp(activeMessages[activeMessages.length - 1].timestamp.toString())}
-                    </span>
-                    {/* {selectedCategory && selectedCategory !== "ALL" && (
-                      <Badge variant="outline" className="px-2 py-1 flex items-center whitespace-nowrap shrink-0">
-                        <Tag className="h-3 w-3 mr-1" />
-                        {CATEGORIES[selectedCategory]} フィルター適用中
-                      </Badge>
-                    )} */}
-                  </div>
-                </CardFooter>
               )}
-
-
-          </CardContent>
-
-
+            </CardContent>
           </Card>
-
         </div>
       </div>
     </div>

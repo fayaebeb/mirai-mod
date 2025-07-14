@@ -17,6 +17,7 @@ declare global {
 }
 
 const scryptAsync = promisify(scrypt);
+const isProduction = process.env.NODE_ENV === "production";
 
 async function hashPassword(password: string) {
   const salt = randomBytes(16).toString("hex");
@@ -43,9 +44,9 @@ export function setupAuth(app: Express) {
     store: storage.sessionStore,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      secure: true,
       httpOnly: true,
-      sameSite: 'strict'
+      secure: isProduction, 
+      sameSite: isProduction ? "strict" : "lax",
     }
   };
 

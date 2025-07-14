@@ -9,37 +9,44 @@ import {
   type Message,
   type Feedback,
   type InviteToken,
+  Chat,
+  User,
+  users,
+  chats,
 } from "@shared/moderatorSchema";
 import { randomBytes } from "crypto";
 
 export class ModeratorStorage {
   // ─── Session / Messages ────────────────────────────
 
-  async getAllSessionIds(): Promise<string[]> {
-    const results = await moderatorDb
-      .select({ sessionId: messages.sessionId })
-      .from(messages)
-      .groupBy(messages.sessionId)
-      .orderBy(messages.sessionId);
+  async getAllUsers(): Promise<User[]> {
+    return await moderatorDb
+      .select()
+      .from(users)
+      .orderBy(users.username);
+  }
 
-    return results
-      .map((row) => row.sessionId)
-      .filter((id): id is string => id !== null);
+  async getChatsByUserId(userId: number): Promise<Chat[]> {
+    return await moderatorDb
+      .select()
+      .from(chats)
+      .where(eq(chats.userId, userId))
+      .orderBy(chats.createdAt);
+  }
+
+  async getMessagesByChatId(chatId: number): Promise<Message[]> {
+    return await moderatorDb
+      .select()
+      .from(messages)
+      .where(eq(messages.chatId, chatId))
+      .orderBy(messages.createdAt);
   }
 
   async getAllMessages(): Promise<Message[]> {
     return await moderatorDb
       .select()
       .from(messages)
-      .orderBy(messages.timestamp);
-  }
-
-  async getMessagesBySessionId(sessionId: string): Promise<Message[]> {
-    return await moderatorDb
-      .select()
-      .from(messages)
-      .where(eq(messages.sessionId, sessionId))
-      .orderBy(messages.timestamp);
+      .orderBy(messages.createdAt);
   }
 
   // ─── Feedback ──────────────────────────────────────

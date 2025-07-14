@@ -357,34 +357,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all unique session IDs for the moderator dashboard
-  app.get("/api/moderator/sessions", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.get("/api/moderator/users", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
 
     try {
-      const sessionIds = await moderatorStorage.getAllSessionIds();
-      res.json(sessionIds);
+      const users = await moderatorStorage.getAllUsers();
+      res.json(users);
     } catch (error) {
-      console.error("Error retrieving session IDs:", error);
+      console.error("Error retrieving users:", error);
       res.status(500).json({
-        message: "Failed to retrieve session IDs",
+        message: "Failed to retrieve users",
         error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   });
 
-  app.get("/api/moderator/messages", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.get("/api/moderator/users/:userId/chats", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.sendStatus(401);
+  }
+
+  // Parse & validate userId
+  const userId = parseInt(req.params.userId, 10);
+  if (Number.isNaN(userId)) {
+    return res.status(400).json({ message: "Invalid userId" });
+  }
+
+  try {
+    const chats = await moderatorStorage.getChatsByUserId(userId);
+    return res.json(chats);
+  } catch (err) {
+    console.error("Error retrieving chats for user:", err);
+    return res.status(500).json({
+      message: "Failed to retrieve chats",
+      error: err instanceof Error ? err.message : "Unknown error",
+    });
+  }
+});
+
+  app.get("/api/moderator/messages/all", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
 
     try {
-      // const { category } = req.query;
-
-      let allMessages = await moderatorStorage.getAllMessages();
-
-      // if (category && category !== "ALL") {
-      //   allMessages = allMessages.filter((msg) => msg.category === category);
-      // }
-
+      const allMessages = await moderatorStorage.getAllMessages();
       res.json(allMessages);
     } catch (error) {
       console.error("Error retrieving all messages:", error);
@@ -396,17 +415,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all messages for a specific session ID
-  app.get("/api/moderator/messages/:sessionId", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
+  app.get("/api/moderator/chats/:chatId/messages", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
+
+    const chatId = parseInt(req.params.chatId, 10);
+    if (Number.isNaN(chatId)) {
+      return res.status(400).json({ message: "Invalid chatId parameter" });
+    }
 
     try {
-      const sessionId = req.params.sessionId;
-      const messages = await moderatorStorage.getMessagesBySessionId(sessionId);
+      const messages = await moderatorStorage.getMessagesByChatId(chatId);
       res.json(messages);
     } catch (error) {
-      console.error("Error retrieving messages for session:", error);
+      console.error("Error retrieving messages for chat:", error);
       res.status(500).json({
-        message: "Failed to retrieve messages for session",
+        message: "Failed to retrieve messages for chat",
         error: error instanceof Error ? error.message : "Unknown error",
       });
     }

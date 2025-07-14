@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: async (user: SelectUser) => {
       // Refetch the latest user data to ensure global state is synced
-      await queryClient.invalidateQueries(["/api/user"]);
+      await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
     },
     onError: (error: Error) => {
       toast({

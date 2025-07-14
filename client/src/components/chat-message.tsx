@@ -28,16 +28,16 @@ interface MessageWithBot extends Omit<Message, 'isBot'> {
   username?: string; // username is optional (only on user messages)
 }
 
-function getDbidTag(dbid?: string): { label: string; className: string } {
+function getDbidTag(dbid?: string): { label: string; className: string, notBotClassName: string } {
   switch (dbid) {
     case "data":
-      return { label: "うごき統計", className: "bg-pink-200 text-pink-800" };
+      return { label: "data", className: "bg-pink-950 text-pink-500", notBotClassName: "bg-pink-200 text-pink-800"  };
     case "db1":
-      return { label: "来た来ぬ統計", className: "bg-blue-200 text-blue-800" };
+      return { label: "db1", className: "bg-blue-950 text-blue-500", notBotClassName: "bg-blue-200 text-blue-800" };
     case "db2":
-      return { label: "インバウンド統計", className: "bg-green-200 text-green-800" };
+      return { label: "db2", className: "bg-green-950 text-green-500", notBotClassName: "bg-green-200 text-green-800" };
     default:
-      return { label: dbid || "不明", className: "bg-gray-300 text-gray-700" };
+      return { label: dbid || "不明", className: "bg-gray-300 text-gray-700", notBotClassName: "bg-gray-300 text-gray-700" };
   }
 }
 
@@ -76,93 +76,54 @@ export default function ChatMessage({ message }: { message: MessageWithBot }) {
   return (
     <TooltipProvider>
       <div
-        className={cn("flex gap-3 relative group", {
+        className={cn("flex gap-3 relative group pb-2", {
           "justify-end": !message.isBot,
         })}
       >
         {message.isBot && (
           <Avatar>
-            <img
-              src="/images/sakura-dp.png"
-              alt="sakura AI"
-              className="w-full h-full object-cover rounded-full border border-pink-400 shadow-md"
-            />
+            <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mr-0.5 bg-black border border-noble-black-500/20 rounded-full text-noble-black-100 flex items-center justify-center">み</div>
           </Avatar>
         )}
 
-            <Card
-              className={cn("px-4 py-3 max-w-[80%] rounded-lg relative flex flex-col gap-2", {
-                "bg-[#FFB7C5] text-black border border-[#FF98A5] shadow-md": !message.isBot,
-                "bg-gray-100 text-black": message.isBot,
-              })}
-            >
-              <div className="break-words text-black">
-                {message.isBot ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {message.content}
-                  </ReactMarkdown>
-                ) : (
-                  <div className="whitespace-pre-wrap">{message.content}</div>
-                )}
-              </div>
+        <Card
+          className={cn("px-4 py-3 max-w-[80%] rounded-lg relative flex flex-col gap-2", {
+            "bg-noble-black-100  text-noble-black-900 border border-noble-black-900 shadow-md": !message.isBot,
+            "bg-black backdrop-blur-md text-noble-black-300 border border-noble-black-900": message.isBot,
+          })}
+        >
+          <div className="break-words ">
+            {message.isBot ? (
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {message.content}
+              </ReactMarkdown>
+            ) : (
+              <div className="whitespace-pre-wrap">{message.content}</div>
+            )}
+          </div>
 
-              <div className="flex justify-end gap-1 mt-2">
-                {message.username && !message.isBot && (
-                  <div className="text-[10px] bg-gray-200 px-2 py-0.5 rounded-full text-gray-600 font-medium shadow-sm">
-                    {message.username.split('@')[0]}
-                  </div>
-                )}
-                {message.dbid && (() => {
-                  const tag = getDbidTag(message.dbid);
-                  return (
-                    <div
-                      className={cn(
-                        "text-[10px] px-2 py-0.5 rounded-full font-semibold shadow-sm",
-                        tag.className
-                      )}
-                    >
-                      {tag.label}
-                    </div>
-                  );
-                })()}
-              </div>
-
-            <div
-              className={cn(
-                "absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity",
-                {
-                  "opacity-40 hover:opacity-100": message.isBot,
-                }
-              )}
-            >
+          <div className="flex justify-between items-center space-x-2">
             <AlertDialog>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className={cn(
-                        "h-8 w-8", 
-                        { "animate-pulse hover:animate-none": message.isBot }
-                      )}
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </Button>
+                  <AlertDialogTrigger className="text-noble-black-400 hover:text-red-600 cursor-pointer" asChild>
+                    
+                      <Trash2 className="h-4 w-4 " />
+                    
                   </AlertDialogTrigger>
                 </TooltipTrigger>
 
               </Tooltip>
 
-              <AlertDialogContent>
+              <AlertDialogContent className="bg-black border border-neutral-800 text-noble-black-100">
                 <AlertDialogHeader>
                   <AlertDialogTitle>メッセージを削除</AlertDialogTitle>
-                  <AlertDialogDescription>
+                  <AlertDialogDescription className="text-noble-black-400">
                     本当にこのメッセージを削除しますか？この操作は元に戻せません。
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                  <AlertDialogCancel className="bg-black text-noble-black-100 border border-noble-black-900 hover:bg-noble-black-800 hover:text-noble-black-100">キャンセル</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => deleteMessage.mutate(message.id)}
                     className="bg-red-500 hover:bg-red-600"
@@ -172,7 +133,27 @@ export default function ChatMessage({ message }: { message: MessageWithBot }) {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+            {message.username && !message.isBot && (
+              <div className="text-[10px] bg-gray-200 px-2 py-0.5 rounded-full text-gray-600 font-medium shadow-sm">
+                {message.username.split('@')[0]}
+              </div>
+            )}
+            {message.dbid && (() => {
+              const tag = getDbidTag(message.dbid);
+              return (
+                <div
+                  className={cn(
+                    "text-[10px] px-2 py-0.5 rounded-full font-semibold shadow-sm",
+                    message.isBot ? tag.className : tag.notBotClassName
+                  )}
+                >
+                  {tag.label}
+                </div>
+              );
+            })()}
           </div>
+
+
         </Card>
       </div>
     </TooltipProvider>

@@ -41,6 +41,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { JellyTriangle } from 'ldrs/react'
+import 'ldrs/react/JellyTriangle.css'
 
 interface FileRecord {
   id: number;
@@ -59,13 +61,13 @@ interface FileRecord {
 function getDbidTag(dbid?: string): { label: string; className: string } {
   switch (dbid) {
     case "data":
-      return { label: "うごき統計", className: "bg-pink-200 text-pink-800" };
+      return { label: "data", className: "bg-pink-950/50 text-pink-600" };
     case "db1":
-      return { label: "来た来ぬ統計", className: "bg-blue-200 text-blue-800" };
+      return { label: "db1", className: "bg-blue-950/50 text-blue-500" };
     case "db2":
       return {
-        label: "インバウンド統計",
-        className: "bg-green-200 text-green-800",
+        label: "db2",
+        className: "bg-green-950/50 text-green-500",
       };
     default:
       return { label: dbid || "不明", className: "bg-gray-300 text-gray-700" };
@@ -124,13 +126,13 @@ export default function FileHistory() {
   function getStatusIcon(status: string) {
     switch (status) {
       case "completed":
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-5 w-5 text-green-600" />;
       case "error":
-        return <XCircle className="h-5 w-5 text-red-500" />;
+        return <XCircle className="h-5 w-5 text-red-600" />;
       case "processing":
-        return <Clock className="h-5 w-5 text-yellow-500" />;
+        return <Clock className="h-5 w-5 text-yellow-600" />;
       default:
-        return <FileText className="h-5 w-5 text-gray-500" />;
+        return <FileText className="h-5 w-5 text-gray-600" />;
     }
   }
 
@@ -140,7 +142,7 @@ export default function FileHistory() {
         return (
           <Badge
             variant="outline"
-            className="bg-green-50 text-green-700 border-green-200"
+            className="bg-green-950/50 text-green-600 border-0"
           >
             完了
           </Badge>
@@ -149,7 +151,7 @@ export default function FileHistory() {
         return (
           <Badge
             variant="outline"
-            className="bg-red-50 text-red-700 border-red-200"
+            className="bg-red-950/50 text-red-600 border-0"
           >
             エラー
           </Badge>
@@ -158,7 +160,7 @@ export default function FileHistory() {
         return (
           <Badge
             variant="outline"
-            className="bg-yellow-50 text-yellow-700 border-yellow-200"
+            className="bg-yellow-950/50 text-yellow-600 border-0"
           >
             処理中
           </Badge>
@@ -167,7 +169,7 @@ export default function FileHistory() {
         return (
           <Badge
             variant="outline"
-            className="bg-gray-50 text-gray-700 border-gray-200"
+            className="bg-gray-950/50 text-gray-600 border-0"
           >
             {status}
           </Badge>
@@ -177,9 +179,9 @@ export default function FileHistory() {
 
   function getFileTypeIcon(contentType: string) {
     if (contentType.includes("image")) {
-      return <FileText className="h-5 w-5 text-blue-500" />;
+      return <FileText className="h-5 w-5 text-blue-600" />;
     } else if (contentType.includes("pdf")) {
-      return <FileText className="h-5 w-5 text-red-500" />;
+      return <FileText className="h-5 w-5 text-red-600" />;
     } else if (
       contentType.includes("spreadsheet") ||
       contentType.includes("excel") ||
@@ -191,9 +193,9 @@ export default function FileHistory() {
       contentType.includes("javascript") ||
       contentType.includes("json")
     ) {
-      return <FileText className="h-5 w-5 text-purple-500" />;
+      return <FileText className="h-5 w-5 text-purple-600" />;
     } else {
-      return <File className="h-5 w-5 text-gray-500" />;
+      return <File className="h-5 w-5 text-gray-600" />;
     }
   }
 
@@ -241,12 +243,12 @@ export default function FileHistory() {
 
   return (
     // Outer wrapper: full screen gradient background with flex layout
-    <div className="min-h-screen bg-gradient-to-b from-[#fff1f2] via-[#ffeae5] to-[#fff4e6] flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b bg-noble-black-900 flex flex-col">
       {/* Fixed header with gradient background */}
-      <div className="sticky top-0 z-10 bg-gradient-to-r from-[#fff1f2] to-[#fff4e6] shadow-sm">
+      <div className="sticky top-0 z-10 border-b border-noble-black-800 bg-black shadow-sm">
         <div className="container mx-auto px-4 py-4 max-w-5xl">
           {/* Header with back button and title */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 border-b pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 border-b border-noble-black-800 pb-3">
             {/* Left Section: Back Button + Title */}
             <div className="flex items-center gap-4">
               {/* Mobile Icon Button */}
@@ -265,7 +267,7 @@ export default function FileHistory() {
                 variant="outline"
                 size="sm"
                 onClick={() => setLocation("/")}
-                className="hidden sm:flex items-center gap-2 px-3 hover:bg-muted transition-all duration-200"
+                className="hidden sm:flex items-center gap-2 px-3 bg-noble-black-900 border-0 text-noble-black-100 transition-all duration-200"
                 aria-label="ホームに戻る"
               >
                 <ArrowLeft className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
@@ -273,7 +275,7 @@ export default function FileHistory() {
               </Button>
 
               {/* Title with stylization */}
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground drop-shadow-sm">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-noble-black-100 drop-shadow-sm">
                 📁 ファイル履歴
               </h1>
             </div>
@@ -282,27 +284,27 @@ export default function FileHistory() {
           {/* Filter and search controls */}
           <div className="space-y-3">
             <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <div className="relative flex-1 ">
+                <Search className="absolute left-2.5 top-3 h-4 w-4 text-noble-black-600" />
                 <Input
                   placeholder="ファイル名で検索..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
+                  className="bg-noble-black-900 text-noble-black-300 border  border-noble-black-800 pl-9"
                 />
               </div>
 
               <div className="flex flex-row sm:flex-row gap-2 sm:w-auto w-full">
                 <div className="relative flex-1 sm:flex-initial">
-                  <Database className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Database className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
                   <Select
                     value={dbFilter}
                     onValueChange={(val) => setDbFilter(val as typeof dbFilter)}
                   >
-                    <SelectTrigger className="w-full sm:w-[140px] pl-9">
+                    <SelectTrigger className="w-full sm:w-[140px] bg-noble-black-900 text-noble-black-300 border  border-noble-black-800 pl-9">
                       <SelectValue placeholder="データベース" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-noble-black-900 text-noble-black-300 border  border-noble-black-800">
                       <SelectItem value="all">すべて</SelectItem>
                       <SelectItem value="data">うごき統計</SelectItem>
                       <SelectItem value="db1">来た来ぬ統計</SelectItem>
@@ -311,12 +313,12 @@ export default function FileHistory() {
                   </Select>
                 </div>
                 <div className="relative flex-1 sm:flex-initial">
-                  <Filter className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Filter className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="w-full sm:w-[140px] pl-9">
+                    <SelectTrigger className="w-full sm:w-[140px] pl-9 bg-noble-black-900 text-noble-black-300 border  border-noble-black-800">
                       <SelectValue placeholder="ステータス" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-noble-black-900 text-noble-black-300 border  border-noble-black-800">
                       <SelectItem value="all">すべて</SelectItem>
                       <SelectItem value="completed">完了</SelectItem>
                       <SelectItem value="processing">処理中</SelectItem>
@@ -326,12 +328,12 @@ export default function FileHistory() {
                 </div>
 
                 <div className="relative flex-1 sm:flex-initial">
-                  <SortAsc className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <SortAsc className="absolute left-2.5 top-3 h-4 w-4 text-muted-foreground" />
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-full sm:w-[140px] pl-9">
+                    <SelectTrigger className="w-full sm:w-[140px] pl-9 bg-noble-black-900 text-noble-black-300 border  border-noble-black-800">
                       <SelectValue placeholder="並び替え" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-noble-black-900 text-noble-black-300 border  border-noble-black-800">
                       <SelectItem value="latest">最新順</SelectItem>
                       <SelectItem value="oldest">古い順</SelectItem>
                       <SelectItem value="name">名前順</SelectItem>
@@ -350,11 +352,18 @@ export default function FileHistory() {
         <div className="container mx-auto max-w-5xl">
           {/* Content area */}
           {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="flex flex-col justify-center items-center h-[calc(100vh-16rem)] space-y-4">
+
+              <JellyTriangle
+                size="30"
+                speed="1.75"
+                color="black"
+              />
+              <h1 className="text-xl md:text-2xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 bg-opacity-50">読み込み中</h1>
+
             </div>
           ) : filteredFiles.length === 0 ? (
-            <Card className="p-8 text-center text-muted-foreground mt-4">
+            <Card className="p-8 text-center bg-black text-noble-black-100 border border-noble-black-800 mt-4">
               {searchQuery || statusFilter !== "all"
                 ? "検索条件に一致するファイルがありません。"
                 : "まだファイルがアップロードされていません。"}
@@ -364,7 +373,7 @@ export default function FileHistory() {
               {filteredFiles.map((file) => (
                 <Card
                   key={file.id}
-                  className="overflow-hidden transition-all hover:shadow-md"
+                  className="overflow-hidden transition-all hover:shadow-md bg-black text-noble-black-100 border border-noble-black-800"
                 >
                   <div
                     className={`flex ${isMobile ? "flex-col" : "flex-row"} p-4 gap-4`}
@@ -380,13 +389,13 @@ export default function FileHistory() {
                     {/* File info */}
                     <div className="flex-1 min-w-0">
                       <h3
-                        className="font-medium text-base text-primary truncate"
+                        className="font-medium text-noble-black-100 truncate"
                         title={file.originalName}
                       >
                         {file.originalName}
                       </h3>
                       <div
-                        className={`text-sm text-muted-foreground ${isMobile ? "flex flex-col gap-1" : ""}`}
+                        className={`text-sm text-noble-black-600 ${isMobile ? "flex flex-col gap-1" : ""}`}
                       >
                         <div className="flex items-center gap-2 flex-wrap">
                           <span>{formatFileSize(file.size)}</span>
@@ -394,20 +403,22 @@ export default function FileHistory() {
                           <span>{format(new Date(file.createdAt), "PPp")}</span>
                         </div>
                         <div className="flex items-center gap-2 flex-wrap mt-1">
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-noble-black-600">
                             データベース:
                           </span>
                           {(() => {
                             const tag = getDbidTag(file.dbid);
                             return (
-                              <span
-                                className={`text-xs font-medium px-2 py-0.5 rounded ${tag.className}`}
+                              <Badge
+                                variant="outline"
+
+                                className={`border-0 ${tag.className}`}
                               >
                                 {tag.label}
-                              </span>
+                              </Badge>
                             );
                           })()}
-                          <span className="text-sm text-muted-foreground">
+                          <span className="text-sm text-noble-black-600">
                             アップロード者:{" "}
                             {file.user
                               ? file.user.username.split("@")[0]
@@ -433,15 +444,15 @@ export default function FileHistory() {
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent>
+                        <AlertDialogContent className="bg-black border border-noble-black-800">
                           <AlertDialogHeader>
-                            <AlertDialogTitle>ファイルの削除</AlertDialogTitle>
-                            <AlertDialogDescription>
+                            <AlertDialogTitle className="text-noble-black-100">ファイルの削除</AlertDialogTitle>
+                            <AlertDialogDescription className="text-noble-black-400">
                               このファイルを削除してもよろしいですか？この操作は元に戻せません。
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+                            <AlertDialogCancel className="bg-black text-noble-black-100 border border-noble-black-900  hover:bg-noble-black-800 hover:text-noble-black-100">キャンセル</AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => deleteMutation.mutate(file.id)}
                               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"

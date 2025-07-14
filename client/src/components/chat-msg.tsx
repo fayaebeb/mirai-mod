@@ -53,39 +53,39 @@ const parseMessageContent = (content: string) => {
   return sections;
 };
 
-const MessageSection = ({ 
-  title, 
-  content, 
-  icon: Icon 
-}: { 
-  title: string; 
-  content: string; 
-  icon: React.ComponentType<any>; 
+const MessageSection = ({
+  title,
+  content,
+  icon: Icon
+}: {
+  title: string;
+  content: string;
+  icon: React.ComponentType<any>;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   if (!content) return null;
 
   return (
-    <Collapsible 
-      open={isOpen} 
+    <Collapsible
+      open={isOpen}
       onOpenChange={setIsOpen}
-      className="mt-3 rounded-lg border border-pink-100 overflow-hidden transition-all duration-200"
+      className="mt-3 rounded-lg border border-noble-black-800 overflow-hidden transition-all duration-200"
     >
       <CollapsibleTrigger asChild>
         <Button
           variant="ghost"
-          className="w-full flex items-center justify-between p-2 hover:bg-pink-50 transition-colors"
+          className="w-full flex items-center justify-between p-2 hover:bg-noble-black-900 rounded-t-lg transition-colors"
         >
           <div className="flex items-center gap-2">
-            <Icon className="h-4 w-4 text-pink-500" />
-            <span className="text-sm font-medium text-pink-700">{title}</span>
+            <Icon className="h-4 w-4 text-noble-black-200" />
+            <span className="text-sm font-medium text-noble-black-200">{title}</span>
           </div>
           <motion.div
             animate={{ rotate: isOpen ? 180 : 0 }}
             transition={{ duration: 0.2 }}
           >
-            <ChevronDown className="h-4 w-4 text-pink-500" />
+            <ChevronDown className="h-4 w-4 text-noble-black-200" />
           </motion.div>
         </Button>
       </CollapsibleTrigger>
@@ -94,9 +94,9 @@ const MessageSection = ({
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          className="p-3 bg-pink-50/50"
+          className="p-3 bg-noble-black-900 text-noble-black-300"
         >
-          <div className="prose prose-sm max-w-none">
+          <div className="  max-w-none">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {content}
             </ReactMarkdown>
@@ -150,59 +150,13 @@ export default function ChatMsg({ message }: { message: Message }) {
         "justify-start": message.isBot
       })}
     >
-      {showEmoji && message.isBot && (
-        <motion.div
-          className="absolute text-base sm:text-lg z-10"
-          style={{
-            left: message.isBot ? "2rem" : "auto",
-            right: message.isBot ? "auto" : "2rem",
-            top: "0",
-          }}
-          initial={{ x: 0, y: 0, opacity: 0, scale: 0.5 }}
-          animate={{
-            x: emojiPosition.x,
-            y: emojiPosition.y,
-            opacity: [0, 1, 0],
-            scale: [0.5, 1.2, 0.8],
-            rotate: [-5, 5, -5],
-          }}
-          transition={{ duration: 1, ease: "easeOut" }}
-        >
-          {Math.random() > 0.5 ? "💕" : "✨"}
-        </motion.div>
-      )}
 
-      {message.isBot && decoration && (
-        <motion.div 
-          className="absolute -top-2 sm:-top-3 -left-1 text-xs sm:text-sm"
-          animate={{ 
-            y: [0, -3, 0],
-            rotate: [0, 10, 0, -10, 0],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{ 
-            duration: 3,
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
-        >
-          {decoration}
-        </motion.div>
-      )}
+
 
       {message.isBot && (
-          <Avatar className="hidden sm:flex flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 border border-pink-300 shadow-md">
-          <motion.div
-            whileHover={{ scale: 1.1, rotate: [0, -5, 5, 0] }}
-            transition={{ rotate: { duration: 0.5 } }}
-          >
-            <img
-              src="/images/sakura-dp.png"
-              alt="Sakura AI"
-              className="w-full h-full object-cover rounded-full border-2 border-pink-400 shadow-md"
-            />
-          </motion.div>
-        </Avatar>
+         
+            <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mr-0.5 bg-black border border-noble-black-500/20 rounded-full text-noble-black-100 flex items-center justify-center">み</div>
+       
       )}
 
       <motion.div
@@ -220,16 +174,16 @@ export default function ChatMsg({ message }: { message: Message }) {
           className={cn(
             "px-2 py-1.5 sm:px-4 sm:py-3 text-sm sm:text-base",
             {
-              "bg-[#FFB7C5] text-black border border-[#FF98A5] shadow-md": !message.isBot,
-              "bg-gradient-to-br from-white to-pink-50 text-black border border-pink-100 shadow-md": message.isBot,
+              "bg-noble-black-100  text-noble-black-900 border border-noble-black-900 shadow-md": !message.isBot,
+              "bg-black backdrop-blur-md text-noble-black-300 border border-noble-black-900": message.isBot,
             }
           )}
         >
           {/* Display category badge */}
-          
 
 
-              <div className="prose prose-xs sm:prose-sm break-words font-medium max-w-none w-full">
+
+          <div className=" break-words font-medium max-w-none w-full">
 
 
             {message.isBot && sections ? (
@@ -237,24 +191,24 @@ export default function ChatMsg({ message }: { message: Message }) {
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
-                      a: ({ href, children }) => (
-                        <a
-                          href={href}
-                          className="text-[#CC3366] hover:text-[#FF98A5] underline"
-                        >
-                          {children}
-                        </a>
+                    a: ({ href, children }) => (
+                      <a
+                        href={href}
+                        className="text-noble-black-100 hover:text-noble-black-400 underline"
+                      >
+                        {children}
+                      </a>
                     ),
                     table: ({ node, ...props }) => (
                       <div className="overflow-x-auto w-full">
-                        <table className="text-[11px] sm:text-sm border-collapse w-full min-w-[400px]" {...props} />
+                        <table className="text-[11px] sm:text-sm border-collapse w-full min-w-[400px] text-noble-black-100" {...props} />
                       </div>
                     ),
                     td: ({ node, ...props }) => (
-                      <td className="border border-pink-200 px-1 py-0.5 sm:px-2 sm:py-1" {...props} />
+                      <td className="border border-noble-black-800 text-noble-black-100 px-1 py-0.5 sm:px-2 sm:py-1" {...props} />
                     ),
                     th: ({ node, ...props }) => (
-                      <th className="border border-pink-300 bg-pink-50 px-1 py-0.5 sm:px-2 sm:py-1" {...props} />
+                      <th className="border border-noble-black-800 bg-black px-1 py-0.5 sm:px-2 sm:py-1 text-noble-black-100" {...props} />
                     ),
                   }}
                 >
@@ -285,23 +239,23 @@ export default function ChatMsg({ message }: { message: Message }) {
                 remarkPlugins={[remarkGfm]}
                 components={{
                   a: ({ href, children }) => (
-                      <a
-                        href={href}
-                        className="text-[#CC3366] hover:text-[#FF98A5] underline"
-                      >
-                        {children}
-                      </a>
+                    <a
+                      href={href}
+                      className="text-noble-black-100 hover:text-noble-black-400 underline"
+                    >
+                      {children}
+                    </a>
                   ),
                   table: ({ node, ...props }) => (
                     <div className="overflow-x-auto w-full">
-                      <table className="text-[11px] sm:text-sm border-collapse w-full min-w-[400px]" {...props} />
+                      <table className="text-[11px] sm:text-sm border-collapse w-full min-w-[400px] text-noble-black-100" {...props} />
                     </div>
                   ),
                   td: ({ node, ...props }) => (
-                    <td className="border border-pink-200 px-1 py-0.5 sm:px-2 sm:py-1" {...props} />
+                    <td className="border border-noble-black-800 px-1 py-0.5 sm:px-2 sm:py-1 text-noble-black-100" {...props} />
                   ),
                   th: ({ node, ...props }) => (
-                    <th className="border border-pink-300 bg-pink-50 px-1 py-0.5 sm:px-2 sm:py-1" {...props} />
+                    <th className="border border-noble-black-800 bg-black px-1 py-0.5 sm:px-2 sm:py-1 text-noble-black-100" {...props} />
                   ),
                 }}
               >
@@ -310,9 +264,9 @@ export default function ChatMsg({ message }: { message: Message }) {
             )}
           </div>
 
-          {message.timestamp && (
-            <div className="text-[9px] sm:text-[10px] text-gray-400 mt-1 text-right">
-              {formatTimestamp(message.timestamp)}
+          {message.createdAt && (
+            <div className={`text-[9px] sm:text-[10px] ${message.isBot ? "text-noble-black-100" : "text-noble-black-900"}  mt-1 text-right`}>
+              {formatTimestamp(message.createdAt)}
             </div>
           )}
         </Card>

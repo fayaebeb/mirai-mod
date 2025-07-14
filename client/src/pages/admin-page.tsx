@@ -8,6 +8,9 @@ import { apiRequest } from "@/lib/queryClient";
 import { InviteToken } from "@shared/schema";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { Spotlight } from "@/components/ui/spotlight";
+import { Mirage } from "ldrs/react";
+import 'ldrs/react/Mirage.css'
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -75,7 +78,8 @@ export default function AdminPage() {
   }
 
   return (
-      <div className="min-h-screen bg-gradient-to-b from-[#fff1f2] via-[#ffeae5] to-[#fff4e6] px-4 py-6 sm:px-6 sm:py-8">
+      <div className="min-h-screen bg-noble-black-900 text-noble-black-100 px-4 py-6 sm:px-6 sm:py-8 relative">
+        <Spotlight/>
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <header className="mb-8">
@@ -84,11 +88,11 @@ export default function AdminPage() {
               <Button
                 variant="outline"
                 onClick={() => setLocation("/")}
-                className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg shadow-sm hover:shadow transition-all duration-200"
+                className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg shadow-sm hover:shadow transition-all duration-200 text-noble-black-100 bg-black border-noble-black-800"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#16213e]">
+              <h1 className="text-2xl sm:text-3xl font-bold text-noble-black-100">
                 管理者ダッシュボード
               </h1>
             </div>
@@ -98,9 +102,9 @@ export default function AdminPage() {
 
         <div className="grid grid-cols-1 gap-6">
           {/* Invite‑Token Generator */}
-          <Card className="p-4 sm:p-6 bg-white/95 backdrop-blur-sm shadow-md rounded-xl border-0">
+          <Card className="p-4 sm:p-6 bg-black border border-noble-black-800 backdrop-blur-sm shadow-md rounded-xl ">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
-              <h2 className="text-xl sm:text-2xl font-semibold text-[#16213e]">
+              <h2 className="text-xl sm:text-2xl font-semibold text-noble-black-100">
                 招待トークン生成
               </h2>
               <div className="flex flex-col sm:flex-row sm:space-x-2 gap-2 w-full sm:w-auto">
@@ -108,7 +112,7 @@ export default function AdminPage() {
                   variant="outline"
                   onClick={() => refetch()}
                   disabled={isLoading}
-                  className="w-full sm:w-auto border-[#e8d9c5] hover:bg-[#f8f5f0] text-[#16213e]"
+                  className="w-full sm:w-auto text-noble-black-400 bg-noble-black-900 border-0 "
                 >
                   <RefreshCw className="h-4 w-4 mr-2" />
                   更新
@@ -116,7 +120,7 @@ export default function AdminPage() {
                 <Button
                   onClick={() => createTokenMutation.mutate()}
                   disabled={createTokenMutation.isPending}
-                  className="w-full sm:w-auto bg-[#e98a9c] hover:bg-[#f1a3b1] text-white transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto bg-white hover:bg-noble-black-900 text-noble-black-900 hover:text-noble-black-100 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {createTokenMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -133,7 +137,11 @@ export default function AdminPage() {
 
             {isLoading ? (
               <div className="flex justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-[#16213e]" />
+                <Mirage
+                  size="60"
+                  speed="2.5"
+                  color="#f2f2f2"
+                />
               </div>
             ) : error ? (
               <div className="p-4 bg-red-50 text-red-500 rounded-md">
@@ -144,7 +152,7 @@ export default function AdminPage() {
                 {tokens.map((token) => (
                   <div
                     key={token.id}
-                    className="p-4 bg-[#f8f5f0] rounded-lg border border-[#e8d9c5] flex justify-between items-center"
+                    className="p-4 bg-noble-black-900 rounded-lg border border-noble-black-800 text-noble-black-300 flex justify-between items-center"
                   >
                     <div className="flex-1 truncate font-mono text-sm">
                       {token.token}

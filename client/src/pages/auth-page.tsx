@@ -16,6 +16,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Loader2, Mail, Lock, User, LogIn, Ticket } from "lucide-react";
+import { DotPulse } from 'ldrs/react'
+import 'ldrs/react/DotPulse.css'
+
+// Default values shown
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
@@ -31,7 +35,7 @@ export default function AuthPage() {
       inviteToken: "",
     },
   });
-  
+
   // Reset form and validation when switching between login and registration
   useEffect(() => {
     form.reset();
@@ -57,23 +61,23 @@ export default function AuthPage() {
     });
 
     return (
-      <div className="min-h-screen flex flex-col md:grid md:grid-cols-2 bg-gradient-to-b from-[#f8eee2] to-[#f7e6d5]">
+      <div className="min-h-screen flex flex-col md:grid md:grid-cols-2 bg-black">
         {/* Bot Logo in Mobile View */}
         <div className="flex flex-col items-center justify-center p-6 md:hidden">
-          <img src="/images/full-sakura-mod.png" alt="桜AI ロゴ" className="w-33 mb-2 drop-shadow-md" />
-          
+          <img src="/images/mirai.png" alt="桜AI ロゴ" className="w-33 mb-2 drop-shadow-md" />
+
         </div>
 
         {/* Authentication Card */}
         <div className="flex flex-col items-center justify-center p-6 md:p-10">
-          <img 
-            src="/images/pclogo.png" 
-            alt="会社ロゴ" 
-            className="w-32 mb-8 drop-shadow-sm transition-all duration-300 hover:scale-105" 
+          <img
+            src="/images/pclogo.png"
+            alt="会社ロゴ"
+            className="w-32 mb-8 drop-shadow-sm transition-all duration-300 hover:scale-105"
           />
-          <Card className="w-full max-w-md p-8 bg-white/95 backdrop-blur-sm shadow-lg rounded-xl border-0">
+          <Card className="w-full max-w-md p-8 bg-noble-black-900 backdrop-blur-sm shadow-lg rounded-xl border border-noble-black-800">
             <div className="text-center mb-6">
-              <h1 className="text-3xl font-bold text-[#16213e]">
+              <h1 className="text-3xl font-bold text-noble-black-100">
                 {isLogin ? "お帰りなさい" : "アカウントを作成"}
               </h1>
               <p className="text-muted-foreground mt-2">
@@ -87,15 +91,15 @@ export default function AuthPage() {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[#16213e] font-medium">メールアドレス</FormLabel>
+                      <FormLabel className="text-noble-black-100 font-medium">メールアドレス</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input 
-                            type="email" 
-                            className="pl-10 py-6 h-12 bg-[#f8f5f0] border-[#e8d9c5] focus-visible:ring-[#16213e]" 
+                          <Input
+                            type="email"
+                            className="pl-10 py-6 h-12 bg-black border-noble-black-800 text-noble-black-100"
                             placeholder="example@email.com"
-                            {...field} 
+                            {...field}
                           />
                         </div>
                       </FormControl>
@@ -108,15 +112,15 @@ export default function AuthPage() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[#16213e] font-medium">パスワード</FormLabel>
+                      <FormLabel className="text-noble-black-100 font-medium">パスワード</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input 
-                            type="password" 
-                            className="pl-10 py-6 h-12 bg-[#f8f5f0] border-[#e8d9c5] focus-visible:ring-[#16213e]" 
-                            placeholder="••••••••" 
-                            {...field} 
+                          <Input
+                            type="password"
+                            className="pl-10 py-6 h-12 bg-black border-noble-black-800 text-noble-black-100"
+                            placeholder="••••••••"
+                            {...field}
                           />
                         </div>
                       </FormControl>
@@ -124,22 +128,22 @@ export default function AuthPage() {
                     </FormItem>
                   )}
                 />
-                
+
                 {!isLogin && (
                   <FormField
                     control={form.control}
                     name="inviteToken"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[#16213e] font-medium">招待トークン</FormLabel>
+                        <FormLabel className=" text-noble-black-100 font-medium">招待トークン</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input 
-                              type="text" 
-                              className="pl-10 py-6 h-12 bg-[#f8f5f0] border-[#e8d9c5] focus-visible:ring-[#16213e]" 
-                              placeholder="招待トークンを入力してください" 
-                              {...field} 
+                            <Input
+                              type="text"
+                              className="pl-10 py-6 h-12 bg-black border-noble-black-800 text-noble-black-100"
+                              placeholder="招待トークンを入力してください"
+                              {...field}
                             />
                           </div>
                         </FormControl>
@@ -148,14 +152,18 @@ export default function AuthPage() {
                     )}
                   />
                 )}
-                
+
                 <Button
                   type="submit"
-                  className="w-full py-6 h-12 bg-[#16213e] hover:bg-[#253758] transition-colors duration-300 mt-2 shadow-md"
+                  className="w-full py-6 h-12 bg-black hover:bg-noble-black-100 text-noble-black-100 hover:text-noble-black-900 transition-colors duration-300 mt-2 shadow-md"
                   disabled={loginMutation.isPending || registerMutation.isPending}
                 >
                   {loginMutation.isPending || registerMutation.isPending ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <DotPulse
+                      size="43"
+                      speed="1.3"
+                      color="#f2f2f2"
+                    />
                   ) : isLogin ? (
                     <div className="flex items-center justify-center gap-2">
                       <LogIn className="h-4 w-4" />
@@ -170,11 +178,11 @@ export default function AuthPage() {
                 </Button>
               </form>
             </Form>
-              <div className="mt-6 flex justify-center">
+            <div className="mt-6 flex justify-center">
               <Button
                 variant="link"
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-sm text-[#16213e] hover:text-[#253758]"
+                className="text-sm text-noble-black-300 hover:text-noble-black-500"
               >
                 {isLogin ? "アカウントが必要ですか？ サインアップ" : "すでにアカウントをお持ちですか？ ログイン"}
               </Button>
@@ -183,9 +191,8 @@ export default function AuthPage() {
         </div>
 
         {/* Branding Section (Hidden in Mobile) */}
-        <div className="hidden md:flex flex-col justify-center items-center p-10 bg-[#f8eee2] text-[#16213e]">
-          <img src="/images/full-sakura-mod.png" alt="桜AI ロゴ" className="w-50 mb-8 drop-shadow-lg" />
-          
+        <div className="hidden md:flex flex-col justify-center items-center p-10 bg-noble-black-900 text-[#16213e] rounded-l-2xl">
+          <img src="/images/miraimod.png" alt="桜AI ロゴ" className="w-3/4 mb-8 drop-shadow-lg" />
         </div>
       </div>
     );

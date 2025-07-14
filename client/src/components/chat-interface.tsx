@@ -32,6 +32,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spotlight } from "./ui/spotlight";
+import { Trio } from "ldrs/react";
+import 'ldrs/react/Trio.css'
+import { JellyTriangle } from 'ldrs/react'
+import 'ldrs/react/JellyTriangle.css'
 type MessageWithUsername = Message & { username: string };
 
 const CHAT_SESSION_KEY_PREFIX = "chat_session_id_user_";
@@ -452,17 +457,18 @@ export default function ChatInterface({
     }
   }, [showTutorial, showWarning]);
 
+  const viewportRef = useRef<HTMLDivElement>(null);
+
   // Auto-scroll to the bottom whenever messages update
   useEffect(() => {
-    const scrollToBottom = () => {
-      scrollAnchorRef.current?.scrollIntoView({ behavior: "auto" });
-    };
-
-    requestAnimationFrame(scrollToBottom); // immediately after paint
-    const timeout = setTimeout(scrollToBottom, 300); // fallback for slow render
-
-    return () => clearTimeout(timeout);
-  }, [messages?.length, sendMessage.isPending, uploadFiles.isPending]);
+    const container = scrollAreaRef.current;
+    if (container) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages, sendMessage.isPending, uploadFiles.isPending]);
 
   // Auto-resize textarea based on content
   useEffect(() => {
@@ -546,8 +552,14 @@ export default function ChatInterface({
 
   if (isLoadingMessages) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3">
-        <LoadingDots />
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-12rem)] gap-3 bg-black rounded border-noble-black-800 p-4">
+
+        <JellyTriangle
+          size="30"
+          speed="1.75"
+          color="#f2f2f2"
+        />
+
         <p className="text-sm text-muted-foreground animate-pulse">
           チャット履歴をお届け中...ちょっと待っててね！
         </p>
@@ -557,12 +569,11 @@ export default function ChatInterface({
 
   return (
     <Card
-      className="flex flex-col h-[calc(100vh-12rem)] relative overflow-hidden shadow-lg border-0 bg-white/90 backdrop-blur-sm"
+      className="flex flex-col h-[calc(100vh-12rem)] bg-noble-black-900 relative overflow-hidden shadow-lg border-0  backdrop-blur-sm"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {showTutorial && <Tutorial onClose={handleCloseTutorial} />}
 
       {isDragging && (
         <div className="absolute inset-0 bg-primary/10 border-2 border-dashed border-primary/50 rounded-lg z-50 flex items-center justify-center">
@@ -582,14 +593,14 @@ export default function ChatInterface({
         </div>
       )}
 
-      <ScrollArea
+      <div
         ref={scrollAreaRef}
-        className={cn("flex-1 px-4 py-3", isDragging && "pointer-events-none")}
+        className={cn("flex-1 px-4 py-3  overflow-y-auto", isDragging && "pointer-events-none")}
       >
         <div className="space-y-5">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-10 px-4">
-              <div className="w-16 h-16 rounded-full bg-[#f8eee2] flex items-center justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-noble-black-100 flex items-center justify-center mb-4">
                 <img
                   src="/images/sakura-mod-logo.png"
                   alt="Descriptive Alt Text"
@@ -612,8 +623,10 @@ export default function ChatInterface({
           ))}
 
           {(sendMessage.isPending || uploadFiles.isPending) && (
-            <div className="flex flex-col items-center gap-2 p-4 bg-[#f8eee2]/30 rounded-lg">
-              <LoadingDots />
+            <div className="flex flex-col items-center gap-2 p-4 bg-noble-black-900 rounded-lg">
+              <Trio size="40"
+                speed="2.5"
+                color="#f2f2f2" />
               <p className="text-sm text-muted-foreground">
                 {uploadFiles.isPending
                   ? "ファイルを処理中です..."
@@ -624,20 +637,20 @@ export default function ChatInterface({
 
           {/* Show file upload progress for each file */}
           {Object.keys(fileUploadProgress).length > 0 && (
-            <div className="p-4 bg-gray-50 rounded-lg space-y-3">
+            <div className="p-4 bg-black text-noble-black-100 rounded-lg space-y-3">
               <h4 className="text-sm font-medium">
                 ファイルのアップロード進捗:
               </h4>
               {Object.entries(fileUploadProgress).map(
                 ([fileName, progress]) => (
                   <div key={fileName} className="space-y-1">
-                    <div className="flex justify-between text-xs text-gray-500">
+                    <div className="flex justify-between text-xs text-noble-black-100">
                       <span className="truncate max-w-[180px]">{fileName}</span>
                       <span>{progress}%</span>
                     </div>
-                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="w-full h-2 bg-noble-black-900 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-primary transition-all duration-300 ease-in-out"
+                        className="h-full bg-noble-black-100 transition-all duration-300 ease-in-out"
                         style={{ width: `${progress}%` }}
                       />
                     </div>
@@ -648,14 +661,14 @@ export default function ChatInterface({
           )}
         </div>
         <div ref={scrollAnchorRef} />
-      </ScrollArea>
+      </div>
 
       {showWarning && (
         <div className="px-4 pb-2 relative">
-          <div className="border-l-4 border-red-500 bg-red-50 text-red-700 px-4 py-3 text-sm rounded-md shadow-sm">
+          <div className="border-l-4 border-red-600 bg-red-950/50 text-red-600 px-4 py-3 text-sm rounded-md shadow-sm">
             <button
               onClick={handleCloseWarning}
-              className="absolute top-2 right-3 text-red-400 hover:text-red-600 rounded-full w-5 h-5 flex items-center justify-center"
+              className="absolute top-1 right-4 text-red-600 hover:text-red-600 rounded-full w-5 h-5 flex items-center justify-center"
               aria-label="閉じる"
             >
               <X className="h-3 w-3" />
@@ -665,40 +678,40 @@ export default function ChatInterface({
           </div>
         </div>
       )}
-      <div className="w-full flex items-center gap-3 mb-4 pl-3">
-        <Database className="w-5 h-5 text-[#16213e] opacity-80" />
+      <div className="w-full flex items-center p-2  md:p-4 space-x-2 border-t border-noble-black-800">
+        <Database className="w-5 h-5 text-noble-black-100 opacity-80" />
 
         <Select
           value={selectedDb}
           onValueChange={(val: "data" | "db1" | "db2") => setSelectedDb(val)}
         >
-          <SelectTrigger className="w-[220px] border border-[#e8d9c5] bg-white text-[#16213e] text-base font-medium rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#16213e]/60 focus:ring-offset-1 transition-all">
-            <SelectValue placeholder="データベースを選択" />
+          <SelectTrigger className="w-fit border border-noble-black-900 bg-black text-base font-medium rounded-xl shadow-sm focus:outline-none  transition-all">
+            <SelectValue className="text-noble-black-900 p-2" placeholder="データベースを選択" />
           </SelectTrigger>
 
-          <SelectContent className="bg-white text-base text-[#16213e] border border-[#e8d9c5] rounded-xl shadow-lg py-2 px-1">
+          <SelectContent className="bg-noble-black-900  text-base text-[#16213e] border border-noble-black-800 rounded-xl shadow-lg py-2 px-1">
             <SelectItem
               value="data"
-              className="px-3 py-2 rounded-md flex items-center gap-2 hover:bg-pink-100 focus:bg-pink-100 text-pink-800 transition-all"
+              className="px-3 py-2 rounded-md flex items-center gap-2 hover:bg-pink-100 focus:bg-noble-black-100 text-pink-800 transition-all"
             >
               <span className="text-sm font-semibold bg-pink-200 px-2 py-0.5 rounded-full">
-                うごき統計
+                Data Type 1 (data)
               </span>
             </SelectItem>
             <SelectItem
               value="db1"
-              className="px-3 py-2 rounded-md flex items-center gap-2 hover:bg-blue-100 focus:bg-blue-100 text-blue-800 transition-all"
+              className="px-3 py-2 rounded-md flex items-center gap-2 hover:bg-blue-100 focus:bg-noble-black-100 focus:text-noble-black-900 text-blue-800 transition-all"
             >
               <span className="text-sm font-semibold bg-blue-200 px-2 py-0.5 rounded-full">
-                来た来ぬ統計
+                Data Type 2 (db1)
               </span>
             </SelectItem>
             <SelectItem
               value="db2"
-              className="px-3 py-2 rounded-md flex items-center gap-2 hover:bg-green-100 focus:bg-green-100 text-green-800 transition-all"
+              className="px-3 py-2 rounded-md flex items-center gap-2 hover:bg-noble-black-100 focus:bg-noble-black-100 text-green-800 transition-all"
             >
               <span className="text-sm font-semibold bg-green-200 px-2 py-0.5 rounded-full">
-                インバウンド統計
+                Data Type 3 (db2)
               </span>
             </SelectItem>
           </SelectContent>
@@ -707,12 +720,12 @@ export default function ChatInterface({
 
       <form
         onSubmit={handleSubmit}
-        className="p-3 border-t flex gap-2 bg-[#fcfaf5]"
+        className="p-3 border rounded-b-2xl flex gap-2 items-center jus bg-black border-noble-black-800"
       >
         <Input
           type="file"
           id="file-upload"
-          className="hidden"
+          className="hidden "
           onChange={handleFileChange}
           multiple
           accept=".pdf,.ppt,.pptx,.docx,.txt,.csv,.xlsx,.xls,application/pdf,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel,text/plain,text/csv"
@@ -723,13 +736,13 @@ export default function ChatInterface({
           size="icon"
           onClick={() => document.getElementById("file-upload")?.click()}
           disabled={uploadFiles.isPending}
-          className="bg-white hover:bg-gray-100 border-[#e8d9c5]"
+          className="bg-noble-black-900 hover:bg-noble-black-100 hover:text-noble-black-900 border-noble-black-800 text-noble-black-100 "
           title="複数のファイルをアップロード"
         >
-          <Upload className="h-4 w-4 text-[#16213e]" />
+          <Upload className="h-4 w-4" />
         </Button>
 
-        <div className="flex-1 relative rounded-md overflow-hidden border border-[#e8d9c5] focus-within:ring-1 focus-within:ring-[#16213e] focus-within:border-[#16213e] bg-white">
+        <div className="flex-1 relative rounded-md overflow-hidden border border-noble-black-800   bg-noble-black-900 text-noble-black-100">
           <Textarea
             ref={textareaRef}
             autoFocus
@@ -740,7 +753,7 @@ export default function ChatInterface({
                 ? "📝 テキスト 🔗 URL 📁 ファイル"
                 : "📝 テキスト 🔗 URL 📁 ファイルをここに入力・アップロードできます"
             }
-            className="flex-1 min-h-[40px] max-h-[150px] resize-none overflow-y-auto border-0 focus-visible:ring-0 px-3 py-2 text-sm sm:text-base"
+            className="flex-1 min-h-[40px] max-h-[150px] resize-none overflow-y-auto border-0 focus-visible:ring-0 px-3 py-2 text-sm sm:text-base bg-noble-black-900"
             style={{ height: "auto" }}
             onKeyDown={(e) => {
               // On non-mobile devices, Enter (without Shift) will submit the message
@@ -756,7 +769,7 @@ export default function ChatInterface({
         <Button
           type="submit"
           disabled={sendMessage.isPending || uploadFiles.isPending}
-          className="bg-[#f5d0c5] hover:bg-[#f1a7b7] text-[#6b4c3b] hover:text-white transition-all duration-300 rounded-full p-3 flex items-center justify-center shadow-lg"
+          className="bg-indigo-800 hover:bg-indigo-950 text-noble-black-100  transition-all duration-300 rounded-full p-3 flex items-center justify-center shadow-lg"
         >
           <Send className="h-5 w-5" />
         </Button>
