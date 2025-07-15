@@ -1,5 +1,5 @@
 // schema/moderatorSchema.ts
-import { pgTable, text, boolean, timestamp, serial, integer, unique } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, timestamp, serial, integer, unique, uniqueIndex, pgEnum } from "drizzle-orm/pg-core";
 
 // ✅ Invite Tokens Table from User DB
 export const inviteTokens = pgTable("invite_tokens", {
@@ -42,6 +42,13 @@ export const chats = pgTable("chats", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 });
 
+export const MessageType = pgEnum('message_type', [
+  'data',
+  'db1',
+  'db2',
+  'regular',
+]);
+
 // ——————————————————————————————————————
 // 3. Messages table (from Mirai app DB)
 // ——————————————————————————————————————
@@ -57,9 +64,10 @@ export const messages = pgTable("messages", {
   isBot: boolean("is_bot").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
   // if you’re using a dbType enum:
-  // dbType: pgEnum("db_type", ["うごき統計","来た来ぬ統計","インバウンド統計","regular"])
-  //   .notNull().default("regular"),
+  dbType: MessageType('db_type').notNull().default('regular'),
   category: text("category").default("SELF").notNull(),
+  vote: integer("vote").default(0).notNull(), // -1, 0, or 1
+
 });
 
 export const feedback = pgTable("feedback", {
@@ -79,5 +87,5 @@ export type InsertInviteToken = {
 };
 export type Message = typeof messages.$inferSelect;
 export type Feedback = typeof feedback.$inferSelect;
-export type User        = typeof users.$inferSelect;
-export type Chat        = typeof chats.$inferSelect;
+export type User = typeof users.$inferSelect;
+export type Chat = typeof chats.$inferSelect;

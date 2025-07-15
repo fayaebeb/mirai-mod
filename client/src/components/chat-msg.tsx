@@ -12,6 +12,7 @@ import { Button } from "./ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
 import { Badge } from "./ui/badge";
+import { getDbidTag } from "./chat-message";
 
 const formatTimestamp = (timestamp: string | Date) => {
   try {
@@ -143,6 +144,7 @@ export default function ChatMsg({ message }: { message: Message }) {
   // Parse message content if it's a bot message
   const sections = message.isBot ? parseMessageContent(message.content) : null;
 
+
   return (
     <div
       className={cn("flex w-full my-4 relative", {
@@ -154,9 +156,9 @@ export default function ChatMsg({ message }: { message: Message }) {
 
 
       {message.isBot && (
-         
-            <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mr-0.5 bg-black border border-noble-black-500/20 rounded-full text-noble-black-100 flex items-center justify-center">み</div>
-       
+
+        <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mr-0.5 bg-black border border-noble-black-500/20 rounded-full text-noble-black-100 flex items-center justify-center">み</div>
+
       )}
 
       <motion.div
@@ -263,12 +265,35 @@ export default function ChatMsg({ message }: { message: Message }) {
               </ReactMarkdown>
             )}
           </div>
+          <div className="flex items-center justify-between mt-2 text-xs sm:text-sm text-noble-black-500">
+            {message.isBot && (
+              <div className="flex items-center space-x-2">
+                {message.dbType && (() => {
+                  const tag = getDbidTag(message.dbType);
+                  return (
+                    <div
+                      className={cn(
+                        "text-[10px] px-3 py-0.5 rounded-full font-semibold shadow-sm",
+                        message.isBot ? tag.className : tag.notBotClassName
+                      )}
+                    >
+                      {tag.label}
+                    </div>
+                  );
+                })()}
+                <Badge className={`px-3 py-0.5 ${message.vote === 1 ? "bg-green-950/50 text-green-600 border border-green-600" : message.vote === -1 ? "bg-red-950 text-red-600 border border-red-600" : "bg-black-500 text-noble-black-100 border border-noble-black-800"}`}>
+                  {message.vote === 1 ? "👍" : message.vote === -1 ? "👎" : "未投票"}
+                </Badge>
+              </div>
 
-          {message.createdAt && (
-            <div className={`text-[9px] sm:text-[10px] ${message.isBot ? "text-noble-black-100" : "text-noble-black-900"}  mt-1 text-right`}>
-              {formatTimestamp(message.createdAt)}
-            </div>
-          )}
+            )}
+
+            {message.createdAt && (
+              <div className={`text-[9px] sm:text-[10px] ${message.isBot ? "text-noble-black-100" : "text-noble-black-900"}  mt-1 text-right`}>
+                {formatTimestamp(message.createdAt)}
+              </div>
+            )}
+          </div>
         </Card>
       </motion.div>
     </div>

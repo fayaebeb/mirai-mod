@@ -24,7 +24,8 @@ import {
   Users,
   MessageSquare,
   Shield,
-  Menu
+  Menu,
+  Filter
 } from "lucide-react";
 import { useLocation } from "wouter";
 import ChatMsg from "@/components/chat-msg";
@@ -52,7 +53,7 @@ export default function ModeratorDashboard() {
   const [_, setLocation] = useLocation();
   const isMobile = useIsMobile();
   const bottomRef = useRef<HTMLDivElement | null>(null);
-
+  const [voteFilter, setVoteFilter] = useState<"all" | "up" | "down">("all");
   // 1️⃣ All messages (for the “no user selected” view)
   const {
     data: allMessages,
@@ -176,6 +177,8 @@ export default function ModeratorDashboard() {
     u.username.toLowerCase().includes(userSearch.toLowerCase())
   );
 
+
+
   // Decide which messages to show in the right panel
   const activeMessages =
     selectedChatId !== null
@@ -183,6 +186,14 @@ export default function ModeratorDashboard() {
       : selectedUserId === null
         ? allMessages
         : null;
+
+  const filteredMessages = activeMessages
+    ? activeMessages.filter((msg) => {
+      if (voteFilter === "up") return msg.vote === 1;
+      if (voteFilter === "down") return msg.vote === -1;
+      return true; // "all"
+    })
+    : [];
 
   return (
     <div className=" h-full md:h-screen flex items-center justify-between bg-gradient-to-br bg-black  md:overflow-hidden">
@@ -436,19 +447,37 @@ export default function ModeratorDashboard() {
 
           {/* ─── Messages Panel */}
           <Card className="shadow-md md:w-3/5 w-full  h-[40rem] md:h-full flex flex-col  overflow-hidden border-noble-black-800 rounded-2xl bg-noble-black-900 text-noble-black-100 ">
-            <CardHeader className="bg-black border-noble-black-800 border-b rounded-t-2xl text-noble-black-100">
-              <CardTitle className="text-noble-black-100 flex items-center gap-2">
-                メッセージ履歴
-              </CardTitle>
-              <CardDescription className="">
-                {selectedChatId
-                  ? `Chat #${selectedChatId}`
-                  : selectedUserId
-                    ? "チャットを選択してください"
-                    : loadAllMessages
-                      ? "全メッセージを表示中"
-                      : "全メッセージを読み込むには下のボタンをクリック"}
-              </CardDescription>
+            <CardHeader className="bg-black border-noble-black-800 border-b rounded-t-2xl text-noble-black-100 flex flex-row items-center justify-between space-x-2 ">
+              <div className="space-y-2">
+                <CardTitle className="text-noble-black-100 flex items-center gap-2">
+                  メッセージ履歴
+                </CardTitle>
+                <CardDescription className="">
+                  {selectedChatId
+                    ? `Chat #${selectedChatId}`
+                    : selectedUserId
+                      ? "チャットを選択してください"
+                      : loadAllMessages
+                        ? "全メッセージを表示中"
+                        : "全メッセージを読み込むには下のボタンをクリック"}
+                </CardDescription>
+              </div>
+              <Select value={voteFilter} onValueChange={(value) => setVoteFilter(value as "all" | "up" | "down")}>
+                {isMobile ? (
+                  <SelectTrigger className="w-fit p-4 bg-black border border-noble-black-800 text-noble-black-100">
+                    <Filter className="h-4 w-4" />
+                  </SelectTrigger>
+                ) :
+                  <SelectTrigger className="w-[180px] bg-black border border-noble-black-800 text-noble-black-100">
+                    <SelectValue placeholder="フィルター: 全て" />
+                  </SelectTrigger>
+                }
+                <SelectContent className="bg-black border border-noble-black-800 text-noble-black-100">
+                  <SelectItem value="all">すべてのメッセージ</SelectItem>
+                  <SelectItem value="up">アップ投票のみ</SelectItem>
+                  <SelectItem value="down">ダウン投票のみ</SelectItem>
+                </SelectContent>
+              </Select>
             </CardHeader>
             <CardContent className=" md:p-4  flex-1 overflow-y-auto">
               {!selectedUserId && !selectedChatId && !loadAllMessages ? (
@@ -465,14 +494,24 @@ export default function ModeratorDashboard() {
                     color="#f2f2f2"
                   />
                 </div>
-              ) : activeMessages  && activeMessages.length > 0 ? (
-                <div className=" md:pr-2">
-                  <div className="space-y-4">
-                    {activeMessages.map((msg) => (
-                      <div key={msg.id} className=" ">
-                        <ChatMsg message={msg} />
+              ) : activeMessages && activeMessages.length > 0 ? (
+                <div className="h-full  md:pr-2">
+                  <div className="space-y-4 h-full">
+                    {filteredMessages.length > 0 ? (
+                      filteredMessages.map((msg) => (
+                        <div key={msg.id}>
+                          <ChatMsg message={msg} />
+                        </div>
+                      ))
+                    ) : (
+                      <div className="flex flex-col  items-center justify-center h-full text-sm text-noble-black-100">
+                        {voteFilter === "up"
+                          ? "アップ投票されたメッセージはありません"
+                          : voteFilter === "down"
+                            ? "ダウン投票されたメッセージはありません"
+                            : "メッセージがありません"}
                       </div>
-                    ))}
+                    )}
                     <div ref={bottomRef} />
                   </div>
                 </div>

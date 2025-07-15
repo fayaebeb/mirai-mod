@@ -1,5 +1,5 @@
 //server/ModeratorStorage.ts
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 import { moderatorDb } from "./moderatorDb";
 import {
   messages,
@@ -95,4 +95,23 @@ export class ModeratorStorage {
       .returning();
     return newToken;
   }
+
+  async getUpvotedMessages(chatId: number) {
+    return await moderatorDb
+      .select()
+      .from(messages)
+      .where(and(eq(messages.chatId, chatId), eq(messages.vote, 1)));
+  }
+
+  // Get all downvoted messages for a chat
+  async getDownvotedMessages(chatId: number) {
+    return await moderatorDb
+      .select()
+      .from(messages)
+      .where(and(eq(messages.chatId, chatId), eq(messages.vote, -1)));
+  }
+
+
+
+
 }

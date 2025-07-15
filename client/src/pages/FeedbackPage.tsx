@@ -23,7 +23,8 @@ import {
   RefreshCw,
   MessageSquare,
   ThumbsUp,
-  ThumbsDown, ArrowUpDown, Info, Sparkles, SquareTerminal
+  ThumbsDown, ArrowUpDown, Info, Sparkles, SquareTerminal,
+  BarChart2
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
@@ -351,7 +352,7 @@ export default function フィードバックPage() {
                 フィードバック
               </TabsTrigger>
               <TabsTrigger value="analytics" className={`${isMobile ? "flex-1" : ""} text-noble-black-100 bg-noble-black-900 data-[state=active]:text-noble-black-100 data-[state=active]:bg-black `}>
-                <BarChart className="h-4 w-4 mr-2" />
+                <BarChart2 className="h-4 w-4 mr-2" />
                 分析
               </TabsTrigger>
             </TabsList>

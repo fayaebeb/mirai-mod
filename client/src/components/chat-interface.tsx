@@ -67,72 +67,72 @@ const LoadingDots = () => {
   );
 };
 
-const Tutorial = ({ onClose }: { onClose: () => void }) => {
-  const [step, setStep] = useState(1);
-  const steps = [
-    {
-      title: "ようこそ！",
-      description:
-        "「桜AI」は、PCKKにおいて、情報提供や質問への回答を行うAIです。私の役割は、さまざまなトピックについて正確で分かりやすい情報を提供し、ユーザーのリクエストに的確にお応えすることです。たとえば、データに基づくご質問には、社内資料や外部情報を参照しながら丁寧にお答えします。",
-      icon: <Sparkles className="h-5 w-5 text-pink-400" />,
-    },
-    {
-      title: "楽しくお話ししましょう！",
-      description:
-        "「桜AI」は、OpenAIの生成モデル「ChatGPT-4o」を使用しています。社内の全国うごき統計に関する営業資料や、人流に関する社内ミニ講座の内容を基礎データとして取り込み、さらにWikipediaやGoogleのAPIを通じてインターネット上の情報も収集しています。これらの情報をもとに、最適な回答を生成しています。",
-      icon: <Heart className="h-5 w-5 text-red-400" />,
-    },
-  ];
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-md p-6 space-y-4 shadow-xl relative bg-white/95 border-0">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors rounded-full w-6 h-6 flex items-center justify-center"
-          aria-label="閉じる"
-        >
-          <X className="h-4 w-4" />
-        </button>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-            {steps[step - 1].icon}
-          </div>
-          <h3 className="text-xl font-semibold text-[#16213e]">
-            {steps[step - 1].title}
-          </h3>
-        </div>
-        <p className="text-muted-foreground leading-relaxed">
-          {steps[step - 1].description}
-        </p>
-        <div className="flex justify-between items-center pt-4">
-          <div className="flex gap-2">
-            {steps.map((_, idx) => (
-              <div
-                key={idx}
-                className={`w-2 h-2 rounded-full transition-colors ${idx + 1 === step ? "bg-primary" : "bg-muted"}`}
-              />
-            ))}
-          </div>
-          <Button
-            onClick={() => {
-              if (step < steps.length) {
-                setStep(step + 1);
-              } else {
-                onClose();
-              }
-            }}
-            className="bg-[#16213e] hover:bg-[#253758] transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <span>{step < steps.length ? "次へ" : "始めましょう！"}</span>
-              <ChevronRight className="h-4 w-4" />
-            </div>
-          </Button>
-        </div>
-      </Card>
-    </div>
-  );
-};
+// const Tutorial = ({ onClose }: { onClose: () => void }) => {
+//   const [step, setStep] = useState(1);
+//   const steps = [
+//     {
+//       title: "ようこそ！",
+//       description:
+//         "「桜AI」は、PCKKにおいて、情報提供や質問への回答を行うAIです。私の役割は、さまざまなトピックについて正確で分かりやすい情報を提供し、ユーザーのリクエストに的確にお応えすることです。たとえば、データに基づくご質問には、社内資料や外部情報を参照しながら丁寧にお答えします。",
+//       icon: <Sparkles className="h-5 w-5 text-pink-400" />,
+//     },
+//     {
+//       title: "楽しくお話ししましょう！",
+//       description:
+//         "「桜AI」は、OpenAIの生成モデル「ChatGPT-4o」を使用しています。社内の全国うごき統計に関する営業資料や、人流に関する社内ミニ講座の内容を基礎データとして取り込み、さらにWikipediaやGoogleのAPIを通じてインターネット上の情報も収集しています。これらの情報をもとに、最適な回答を生成しています。",
+//       icon: <Heart className="h-5 w-5 text-red-400" />,
+//     },
+//   ];
+//   return (
+//     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+//       <Card className="w-full max-w-md p-6 space-y-4 shadow-xl relative bg-white/95 border-0">
+//         <button
+//           onClick={onClose}
+//           className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors rounded-full w-6 h-6 flex items-center justify-center"
+//           aria-label="閉じる"
+//         >
+//           <X className="h-4 w-4" />
+//         </button>
+//         <div className="flex items-center gap-3">
+//           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+//             {steps[step - 1].icon}
+//           </div>
+//           <h3 className="text-xl font-semibold text-[#16213e]">
+//             {steps[step - 1].title}
+//           </h3>
+//         </div>
+//         <p className="text-muted-foreground leading-relaxed">
+//           {steps[step - 1].description}
+//         </p>
+//         <div className="flex justify-between items-center pt-4">
+//           <div className="flex gap-2">
+//             {steps.map((_, idx) => (
+//               <div
+//                 key={idx}
+//                 className={`w-2 h-2 rounded-full transition-colors ${idx + 1 === step ? "bg-primary" : "bg-muted"}`}
+//               />
+//             ))}
+//           </div>
+//           <Button
+//             onClick={() => {
+//               if (step < steps.length) {
+//                 setStep(step + 1);
+//               } else {
+//                 onClose();
+//               }
+//             }}
+//             className="bg-[#16213e] hover:bg-[#253758] transition-colors"
+//           >
+//             <div className="flex items-center gap-2">
+//               <span>{step < steps.length ? "次へ" : "始めましょう！"}</span>
+//               <ChevronRight className="h-4 w-4" />
+//             </div>
+//           </Button>
+//         </div>
+//       </Card>
+//     </div>
+//   );
+// };
 
 export default function ChatInterface({
   sortBy,

@@ -28,7 +28,7 @@ interface MessageWithBot extends Omit<Message, 'isBot'> {
   username?: string; // username is optional (only on user messages)
 }
 
-function getDbidTag(dbid?: string): { label: string; className: string, notBotClassName: string } {
+export function getDbidTag(dbid?: string): { label: string; className: string, notBotClassName: string } {
   switch (dbid) {
     case "data":
       return { label: "data", className: "bg-pink-950 text-pink-500", notBotClassName: "bg-pink-200 text-pink-800"  };

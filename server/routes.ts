@@ -375,27 +375,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/moderator/users/:userId/chats", async (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.sendStatus(401);
-  }
+    if (!req.isAuthenticated()) {
+      return res.sendStatus(401);
+    }
 
-  // Parse & validate userId
-  const userId = parseInt(req.params.userId, 10);
-  if (Number.isNaN(userId)) {
-    return res.status(400).json({ message: "Invalid userId" });
-  }
+    // Parse & validate userId
+    const userId = parseInt(req.params.userId, 10);
+    if (Number.isNaN(userId)) {
+      return res.status(400).json({ message: "Invalid userId" });
+    }
 
-  try {
-    const chats = await moderatorStorage.getChatsByUserId(userId);
-    return res.json(chats);
-  } catch (err) {
-    console.error("Error retrieving chats for user:", err);
-    return res.status(500).json({
-      message: "Failed to retrieve chats",
-      error: err instanceof Error ? err.message : "Unknown error",
-    });
-  }
-});
+    try {
+      const chats = await moderatorStorage.getChatsByUserId(userId);
+      return res.json(chats);
+    } catch (err) {
+      console.error("Error retrieving chats for user:", err);
+      return res.status(500).json({
+        message: "Failed to retrieve chats",
+        error: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  });
 
   app.get("/api/moderator/messages/all", async (req, res) => {
     if (!req.isAuthenticated()) {
@@ -554,6 +554,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (err) {
       console.error("Error generating summary:", err);
       res.status(500).json({ error: "Failed to generate summary" });
+    }
+  });
+
+  app.get("/api/moderator/chats/:chatId/upvotes", async (req, res) => {
+    const chatId = Number(req.params.chatId);
+    if (isNaN(chatId)) return res.status(400).json({ error: "Invalid chatId" });
+
+    try {
+      const messages = await moderatorStorage.getUpvotedMessages(chatId);
+      res.json(messages);
+    } catch (err) {
+      console.error("GET /chats/:chatId/upvotes error:", err);
+      res.status(500).json({ error: "Failed to fetch upvoted messages" });
+    }
+  });
+
+  app.get("/api/moderator/chats/:chatId/downvotes", async (req, res) => {
+    const chatId = Number(req.params.chatId);
+    if (isNaN(chatId)) return res.status(400).json({ error: "Invalid chatId" });
+
+    try {
+      const messages = await moderatorStorage.getDownvotedMessages(chatId);
+      res.json(messages);
+    } catch (err) {
+      console.error("GET /chats/:chatId/downvotes error:", err);
+      res.status(500).json({ error: "Failed to fetch downvoted messages" });
     }
   });
 

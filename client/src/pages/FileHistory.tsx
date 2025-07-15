@@ -306,9 +306,9 @@ export default function FileHistory() {
                     </SelectTrigger>
                     <SelectContent className="bg-noble-black-900 text-noble-black-300 border  border-noble-black-800">
                       <SelectItem value="all">すべて</SelectItem>
-                      <SelectItem value="data">うごき統計</SelectItem>
-                      <SelectItem value="db1">来た来ぬ統計</SelectItem>
-                      <SelectItem value="db2">インバウンド統計</SelectItem>
+                      <SelectItem value="data">data</SelectItem>
+                      <SelectItem value="db1">db1</SelectItem>
+                      <SelectItem value="db2">db2</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
