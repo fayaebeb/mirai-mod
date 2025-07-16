@@ -695,7 +695,7 @@ export default function ChatInterface({
               className="px-3 py-2 rounded-md flex items-center gap-2 hover:bg-pink-100 focus:bg-noble-black-100 text-pink-800 transition-all"
             >
               <span className="text-sm font-semibold bg-pink-200 px-2 py-0.5 rounded-full">
-                Data Type 1 (db1)
+                Data Type 1 (DB1)
               </span>
             </SelectItem>
             <SelectItem
@@ -703,7 +703,7 @@ export default function ChatInterface({
               className="px-3 py-2 rounded-md flex items-center gap-2 hover:bg-blue-100 focus:bg-noble-black-100 focus:text-noble-black-900 text-blue-800 transition-all"
             >
               <span className="text-sm font-semibold bg-blue-200 px-2 py-0.5 rounded-full">
-                Data Type 2 (db2)
+                Data Type 2 (DB2)
               </span>
             </SelectItem>
             <SelectItem
@@ -711,7 +711,7 @@ export default function ChatInterface({
               className="px-3 py-2 rounded-md flex items-center gap-2 hover:bg-noble-black-100 focus:bg-noble-black-100 text-green-800 transition-all"
             >
               <span className="text-sm font-semibold bg-green-200 px-2 py-0.5 rounded-full">
-                Data Type 3 (db3)
+                Data Type 3 (DB3)
               </span>
             </SelectItem>
           </SelectContent>

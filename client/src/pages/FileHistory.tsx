@@ -61,12 +61,12 @@ interface FileRecord {
 function getDbidTag(dbid?: string): { label: string; className: string } {
   switch (dbid) {
     case "db1":
-      return { label: "db1", className: "bg-pink-950/50 text-pink-600" };
+      return { label: "DB1", className: "bg-pink-950/50 text-pink-600" };
     case "db2":
-      return { label: "db2", className: "bg-blue-950/50 text-blue-500" };
+      return { label: "DB2", className: "bg-blue-950/50 text-blue-500" };
     case "db3":
       return {
-        label: "db3",
+        label: "DB3",
         className: "bg-green-950/50 text-green-500",
       };
     default:
@@ -305,10 +305,10 @@ export default function FileHistory() {
                       <SelectValue placeholder="データベース" />
                     </SelectTrigger>
                     <SelectContent className="bg-noble-black-900 text-noble-black-300 border  border-noble-black-800">
-                      <SelectItem value="all">すべて</SelectItem>
-                      <SelectItem value="db1">db1</SelectItem>
-                      <SelectItem value="db2">db2</SelectItem>
-                      <SelectItem value="db3">db3</SelectItem>
+                      <SelectItem value="all">参照DB指定</SelectItem>
+                      <SelectItem value="db1">DB1</SelectItem>
+                      <SelectItem value="db2">DB2</SelectItem>
+                      <SelectItem value="db3">DB3</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

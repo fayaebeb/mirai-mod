@@ -83,7 +83,7 @@ export default function HomePage() {
 
         {/* Center: Sakura Logo */}
         <div className="flex justify-center flex-1">
-          <div className="text-xl font-semibold z-20 h-16 sm:h-24 flex items-center justify-center cursor-pointer text-noble-black-100">みらい</div>
+          <div className="text-xl font-semibold z-20 h-16 sm:h-24 flex items-center justify-center cursor-pointer text-noble-black-100">ミライ</div>
         </div>
 
         {/* Right: Username + AlignJustify */}
@@ -128,7 +128,7 @@ export default function HomePage() {
               <Link href="/admin">
                 <DropdownMenuItem className="cursor-pointer text-noble-black-100 hover:bg-noble-black-100 hover:text-noble-black-900 px-4 py-3 text-base">
                   <ShieldPlus className="h-12 w-12  hover:bg-noble-black-900" />
-                  モデレータ招待
+                  モデレーター招待
                 </DropdownMenuItem>
               </Link>
 
@@ -149,7 +149,7 @@ export default function HomePage() {
               <Link href="/files">
                 <DropdownMenuItem className="cursor-pointer text-noble-black-100 hover:bg-noble-black-100 hover:text-noble-black-900 px-4 py-3 text-base">
                   <FileText className="h-8 w-8  hover:bg-noble-black-900" />
-                  ファイル履歴
+                  アップロードファイル履歴
                 </DropdownMenuItem>
               </Link>
 
@@ -222,7 +222,7 @@ export default function HomePage() {
               <div className="flex flex-nowrap items-center gap-3 sm:gap-6 min-w-max">
                 {/* Title */}
                 <h2 className="text-base sm:text-lg font-semibold text-noble-black-100 flex items-center gap-2 whitespace-nowrap shrink-0">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mr-0.5 bg-noble-black-900 border border-noble-black-500/20 rounded-full text-noble-black-100 flex items-center justify-center">み</div>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mr-0.5 bg-noble-black-900 border border-noble-black-500/20 rounded-full text-noble-black-100 flex items-center justify-center">ミ</div>
 
                   データ入力パネル
                 </h2>
@@ -249,10 +249,10 @@ export default function HomePage() {
                       <SelectValue placeholder="データベース" />
                     </SelectTrigger>
                     <SelectContent className="bg-noble-black-900 border border-noble-black-800 text-noble-black-100">
-                      <SelectItem value="all">すべて</SelectItem>
-                      <SelectItem value="db1">db1</SelectItem>
-                      <SelectItem value="db2">db2</SelectItem>
-                      <SelectItem value="db3">db3</SelectItem>
+                      <SelectItem value="all">参照DB指定</SelectItem>
+                      <SelectItem value="db1">DB1</SelectItem>
+                      <SelectItem value="db2">DB2</SelectItem>
+                      <SelectItem value="db3">DB3</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

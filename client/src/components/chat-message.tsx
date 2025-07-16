@@ -31,11 +31,11 @@ interface MessageWithBot extends Omit<Message, 'isBot'> {
 export function getDbidTag(dbid?: string): { label: string; className: string, notBotClassName: string } {
   switch (dbid) {
     case "db1":
-      return { label: "db1", className: "bg-pink-950 text-pink-500", notBotClassName: "bg-pink-200 text-pink-800"  };
+      return { label: "DB1", className: "bg-pink-950 text-pink-500", notBotClassName: "bg-pink-200 text-pink-800"  };
     case "db2":
-      return { label: "db2", className: "bg-blue-950 text-blue-500", notBotClassName: "bg-blue-200 text-blue-800" };
+      return { label: "DB2", className: "bg-blue-950 text-blue-500", notBotClassName: "bg-blue-200 text-blue-800" };
     case "db3":
-      return { label: "db3", className: "bg-green-950 text-green-500", notBotClassName: "bg-green-200 text-green-800" };
+      return { label: "DB3", className: "bg-green-950 text-green-500", notBotClassName: "bg-green-200 text-green-800" };
     default:
       return { label: dbid || "不明", className: "bg-gray-300 text-gray-700", notBotClassName: "bg-gray-300 text-gray-700" };
   }
@@ -83,7 +83,7 @@ export default function ChatMessage({ message }: { message: MessageWithBot }) {
       >
         {message.isBot && (
           <Avatar>
-            <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mr-0.5 bg-black border border-noble-black-500/20 rounded-full text-noble-black-100 flex items-center justify-center">み</div>
+            <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mr-0.5 bg-black border border-noble-black-500/20 rounded-full text-noble-black-100 flex items-center justify-center">ミ</div>
           </Avatar>
         )}
 

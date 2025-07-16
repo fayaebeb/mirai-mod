@@ -80,7 +80,7 @@ export default function UserAdd() {
   }
 
   return (
-    <div className="min-h-screen bg-noble-black-900 text-noble-black-100 px-4 py-6 sm:px-6 sm:py-8">
+    <div className="min-h-screen overflow-hidden bg-noble-black-900 text-noble-black-100 px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <header className="mb-8">
@@ -105,9 +105,15 @@ export default function UserAdd() {
           {/* Invite‑Token Generator */}
           <Card className="p-4 sm:p-6 bg-black border border-noble-black-800 backdrop-blur-sm shadow-md rounded-xl ">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
-              <h2 className="text-xl sm:text-2xl font-semibold text-noble-black-100">
-                ユーザーアカウント作成用トークン生成
-              </h2>
+              <div className="flex flex-col space-y-2">
+                <h2 className="text-xl sm:text-2xl font-semibold text-noble-black-100">
+                  ユーザー管理
+                </h2>
+                <p className="text-noble-black-500 text-sm">
+                  ユーザー登録用のアカウント作成トークンを作成します。<br />
+                  トークンは1人につき1つ発行され、使用後は画面から自動で削除されます。
+                </p>
+              </div>
               <div className="flex flex-col sm:flex-row sm:space-x-2 gap-2 w-full sm:w-auto">
                 <Button
                   variant="outline"
@@ -128,7 +134,7 @@ export default function UserAdd() {
                   ) : (
                     <>
                       <Plus className="h-4 w-4 mr-2" />
-                      新しいトークンを作成
+                      アカウント作成トークン作成
                     </>
                   )}
                 </Button>
