@@ -275,7 +275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const astraMessageId = msgIdMatch[1];
           const dbid = message.dbid;
 
-          const validDbids = ["data", "db1", "db2"] as const;
+          const validDbids = ["db1", "db2", "db3"] as const;
 
           if (dbid && validDbids.includes(dbid as any)) {
             try {
@@ -332,10 +332,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.warn(
             `⚠️ File ${file.filename} has no dbid. Skipping AstraDB deletion.`,
           );
-        } else if (["data", "db1", "db2"].includes(file.dbid)) {
+        } else if (["db1", "db2", "db3"].includes(file.dbid)) {
           await deleteFileFromAstraDB(
             file.filename,
-            file.dbid as "data" | "db1" | "db2",
+            file.dbid as "db1" | "db2" | "db3",
           );
         } else {
           console.warn(

@@ -30,12 +30,12 @@ interface MessageWithBot extends Omit<Message, 'isBot'> {
 
 export function getDbidTag(dbid?: string): { label: string; className: string, notBotClassName: string } {
   switch (dbid) {
-    case "data":
-      return { label: "data", className: "bg-pink-950 text-pink-500", notBotClassName: "bg-pink-200 text-pink-800"  };
     case "db1":
-      return { label: "db1", className: "bg-blue-950 text-blue-500", notBotClassName: "bg-blue-200 text-blue-800" };
+      return { label: "db1", className: "bg-pink-950 text-pink-500", notBotClassName: "bg-pink-200 text-pink-800"  };
     case "db2":
-      return { label: "db2", className: "bg-green-950 text-green-500", notBotClassName: "bg-green-200 text-green-800" };
+      return { label: "db2", className: "bg-blue-950 text-blue-500", notBotClassName: "bg-blue-200 text-blue-800" };
+    case "db3":
+      return { label: "db3", className: "bg-green-950 text-green-500", notBotClassName: "bg-green-200 text-green-800" };
     default:
       return { label: dbid || "不明", className: "bg-gray-300 text-gray-700", notBotClassName: "bg-gray-300 text-gray-700" };
   }

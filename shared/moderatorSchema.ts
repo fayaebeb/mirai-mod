@@ -43,9 +43,9 @@ export const chats = pgTable("chats", {
 });
 
 export const MessageType = pgEnum('message_type', [
-  'data',
   'db1',
   'db2',
+  'db3',
   'regular',
 ]);
 

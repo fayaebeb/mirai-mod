@@ -45,7 +45,7 @@ const WARNING_SHOWN_KEY_PREFIX = "warning_shown_user_";
 
 type SendMessagePayload = {
   content: string;
-  dbid: "data" | "db1" | "db2";
+  dbid: "db1" | "db2" | "db3";
 };
 
 const LoadingDots = () => {
@@ -141,7 +141,7 @@ export default function ChatInterface({
   messageSearch,
 }: {
   sortBy: "latest" | "oldest";
-  dbFilter: "data" | "db1" | "db2" | "all";
+  dbFilter: "db1" | "db2" | "db3" | "all";
   usernameFilter: string;
   messageSearch: string;
 }) {
@@ -153,8 +153,8 @@ export default function ChatInterface({
   const { user } = useAuth();
   const { toast } = useToast();
   const [_, setLocation] = useLocation();
-  const [selectedDb, setSelectedDb] = useState<"data" | "db1" | "db2">(
-    "data",
+  const [selectedDb, setSelectedDb] = useState<"db1" | "db2" | "db3">(
+    "db1",
   );
 
   const [showWarning, setShowWarning] = useState(false);
@@ -683,7 +683,7 @@ export default function ChatInterface({
 
         <Select
           value={selectedDb}
-          onValueChange={(val: "data" | "db1" | "db2") => setSelectedDb(val)}
+          onValueChange={(val: "db1" | "db2" | "db3") => setSelectedDb(val)}
         >
           <SelectTrigger className="w-fit border border-noble-black-900 bg-black text-base font-medium rounded-xl shadow-sm focus:outline-none  transition-all">
             <SelectValue className="text-noble-black-900 p-2" placeholder="データベースを選択" />
@@ -691,27 +691,27 @@ export default function ChatInterface({
 
           <SelectContent className="bg-noble-black-900  text-base text-[#16213e] border border-noble-black-800 rounded-xl shadow-lg py-2 px-1">
             <SelectItem
-              value="data"
+              value="db1"
               className="px-3 py-2 rounded-md flex items-center gap-2 hover:bg-pink-100 focus:bg-noble-black-100 text-pink-800 transition-all"
             >
               <span className="text-sm font-semibold bg-pink-200 px-2 py-0.5 rounded-full">
-                Data Type 1 (data)
-              </span>
-            </SelectItem>
-            <SelectItem
-              value="db1"
-              className="px-3 py-2 rounded-md flex items-center gap-2 hover:bg-blue-100 focus:bg-noble-black-100 focus:text-noble-black-900 text-blue-800 transition-all"
-            >
-              <span className="text-sm font-semibold bg-blue-200 px-2 py-0.5 rounded-full">
-                Data Type 2 (db1)
+                Data Type 1 (db1)
               </span>
             </SelectItem>
             <SelectItem
               value="db2"
+              className="px-3 py-2 rounded-md flex items-center gap-2 hover:bg-blue-100 focus:bg-noble-black-100 focus:text-noble-black-900 text-blue-800 transition-all"
+            >
+              <span className="text-sm font-semibold bg-blue-200 px-2 py-0.5 rounded-full">
+                Data Type 2 (db2)
+              </span>
+            </SelectItem>
+            <SelectItem
+              value="db3"
               className="px-3 py-2 rounded-md flex items-center gap-2 hover:bg-noble-black-100 focus:bg-noble-black-100 text-green-800 transition-all"
             >
               <span className="text-sm font-semibold bg-green-200 px-2 py-0.5 rounded-full">
-                Data Type 3 (db2)
+                Data Type 3 (db3)
               </span>
             </SelectItem>
           </SelectContent>

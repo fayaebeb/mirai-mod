@@ -555,7 +555,7 @@ export async function storeInAstraDB(
 ): Promise<void> {
   console.log(`📦 Storing data in AstraDB collection '${dbid}'...`);
 
-  const validDbids = ["data", "db1", "db2"];
+  const validDbids = ["db1", "db2", "db3"];
   if (!validDbids.includes(dbid)) {
     throw new Error(`Invalid dbid '${dbid}' specified`);
   }
@@ -581,7 +581,7 @@ export async function storeInAstraDB(
  */
 export async function deleteFileFromAstraDB(
   filename: string,
-  dbid: "data" | "db1" | "db2"
+  dbid: "db1" | "db2" | "db3"
 ): Promise<void> {
   console.log(`🗑️ Deleting file '${filename}' from AstraDB collection '${dbid}'`);
   try {

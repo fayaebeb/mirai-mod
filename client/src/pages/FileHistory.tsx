@@ -60,13 +60,13 @@ interface FileRecord {
 
 function getDbidTag(dbid?: string): { label: string; className: string } {
   switch (dbid) {
-    case "data":
-      return { label: "data", className: "bg-pink-950/50 text-pink-600" };
     case "db1":
-      return { label: "db1", className: "bg-blue-950/50 text-blue-500" };
+      return { label: "db1", className: "bg-pink-950/50 text-pink-600" };
     case "db2":
+      return { label: "db2", className: "bg-blue-950/50 text-blue-500" };
+    case "db3":
       return {
-        label: "db2",
+        label: "db3",
         className: "bg-green-950/50 text-green-500",
       };
     default:
@@ -81,7 +81,7 @@ export default function FileHistory() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("latest");
-  const [dbFilter, setDbFilter] = useState<"data" | "db1" | "db2" | "all">(
+  const [dbFilter, setDbFilter] = useState<"db1" | "db2" | "db3" | "all">(
     "all",
   );
 
@@ -306,9 +306,9 @@ export default function FileHistory() {
                     </SelectTrigger>
                     <SelectContent className="bg-noble-black-900 text-noble-black-300 border  border-noble-black-800">
                       <SelectItem value="all">すべて</SelectItem>
-                      <SelectItem value="data">data</SelectItem>
                       <SelectItem value="db1">db1</SelectItem>
                       <SelectItem value="db2">db2</SelectItem>
+                      <SelectItem value="db3">db3</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

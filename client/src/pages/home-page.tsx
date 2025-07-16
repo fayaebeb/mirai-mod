@@ -61,7 +61,7 @@ export default function HomePage() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const isMobile = useIsMobile();
   const [sortBy, setSortBy] = useState<"latest" | "oldest">("oldest");
-  const [dbFilter, setDbFilter] = useState<"data" | "db1" | "db2" | "all">(
+  const [dbFilter, setDbFilter] = useState<"db1" | "db2" | "db3" | "all">(
     "all",
   );
   const [usernameFilter, setUsernameFilter] = useState<string>("");
@@ -250,9 +250,9 @@ export default function HomePage() {
                     </SelectTrigger>
                     <SelectContent className="bg-noble-black-900 border border-noble-black-800 text-noble-black-100">
                       <SelectItem value="all">すべて</SelectItem>
-                      <SelectItem value="data">data</SelectItem>
                       <SelectItem value="db1">db1</SelectItem>
                       <SelectItem value="db2">db2</SelectItem>
+                      <SelectItem value="db3">db3</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
