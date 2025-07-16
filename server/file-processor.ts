@@ -599,7 +599,7 @@ export async function deleteFileFromAstraDB(
 async function testAstraDBConnection() {
   try {
     console.log("Testing AstraDB connection...");
-    await db.collection("data").findOne({});
+    await db.collection("db1").findOne({});
     console.log("✅ Successfully connected to AstraDB");
   } catch (error) {
     console.error("❌ Error connecting to AstraDB:", error);
