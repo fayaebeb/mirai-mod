@@ -107,7 +107,7 @@ export default function UserAdd() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
               <div className="flex flex-col space-y-2">
                 <h2 className="text-xl sm:text-2xl font-semibold text-noble-black-100">
-                  ユーザー管理
+                  ユーザーアカウント作成用トークン作成
                 </h2>
                 <p className="text-noble-black-500 text-sm">
                   ユーザー登録用のアカウント作成トークンを作成します。<br />
@@ -134,7 +134,7 @@ export default function UserAdd() {
                   ) : (
                     <>
                       <Plus className="h-4 w-4 mr-2" />
-                      アカウント作成トークン作成
+                      トークン作成
                     </>
                   )}
                 </Button>

@@ -106,7 +106,7 @@ export default function AdminPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-2">
               <div className="flex flex-col space-y-2">
                 <h2 className="text-xl sm:text-2xl font-semibold text-noble-black-100">
-                  モデレーター管理
+                  招待トークン作成
                 </h2>
                 <p className="text-noble-black-500 text-sm">
                   モデレーター登録用の招待トークンを作成します。<br />
@@ -133,7 +133,7 @@ export default function AdminPage() {
                   ) : (
                     <>
                       <Plus className="h-4 w-4 mr-2" />
-                      招待トークン作成
+                      トークン作成
                     </>
                   )}
                 </Button>
