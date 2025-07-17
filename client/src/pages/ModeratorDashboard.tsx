@@ -278,7 +278,7 @@ export default function ModeratorDashboard() {
             <Shield className="h-8 w-8 text-noble-black-100" />
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-noble-black-100">
-                知識の登録管理
+                チャット管理
               </h1>
               <p className="text-sm text-noble-black-400">
                 ユーザー → チャット → メッセージ 管理

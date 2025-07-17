@@ -142,7 +142,7 @@ export default function HomePage() {
               <Link href="/moderator">
                 <DropdownMenuItem className="cursor-pointer text-noble-black-100 hover:bg-noble-black-100 hover:text-noble-black-900 px-4 py-3 text-base">
                   <ShieldAlert className="h-8 w-8  hover:bg-noble-black-900" />
-                  モデレーター
+                  チャット管理
                 </DropdownMenuItem>
               </Link>
 
