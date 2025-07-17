@@ -247,7 +247,7 @@ export default function HomePage() {
                       <SelectValue placeholder="データベース" />
                     </SelectTrigger>
                     <SelectContent className="bg-noble-black-900 border border-noble-black-800 text-noble-black-100">
-                      <SelectItem value="all">参照DB指定</SelectItem>
+                      <SelectItem value="all">すべてのDB</SelectItem>
                       <SelectItem value="db1">DB1</SelectItem>
                       <SelectItem value="db2">DB2</SelectItem>
                       <SelectItem value="db3">DB3</SelectItem>
