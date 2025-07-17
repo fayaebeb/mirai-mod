@@ -53,7 +53,7 @@ export default function AuthPage() {
   }, [user, setLocation]);
 
   if (!user) {
-    const onSubmit = form.handleSubmit((data) => {
+    const onSubmit = form.handleSubmit(async (data) => {
 
       if (!captcha) {
         toast({
@@ -69,10 +69,10 @@ export default function AuthPage() {
         if (isLogin) {
           // For login, we only need username and password
           const { username, password } = data;
-          loginMutation.mutate({ username, password, turnstileToken: captcha });
+          await loginMutation.mutateAsync({ username, password, turnstileToken: captcha });
         } else {
           // For registration, we need all fields including invite token
-          registerMutation.mutate({ ...data, turnstileToken: captcha });
+          await registerMutation.mutateAsync({ ...data, turnstileToken: captcha });
         }
         console.log("Success - about to reset captcha");
 
