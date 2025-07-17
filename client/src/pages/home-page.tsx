@@ -128,14 +128,14 @@ export default function HomePage() {
               <Link href="/admin">
                 <DropdownMenuItem className="cursor-pointer text-noble-black-100 hover:bg-noble-black-100 hover:text-noble-black-900 px-4 py-3 text-base">
                   <ShieldPlus className="h-12 w-12  hover:bg-noble-black-900" />
-                  モデレーター招待
+                  モデレーター管理
                 </DropdownMenuItem>
               </Link>
 
               <Link href="/useradd">
                 <DropdownMenuItem className="cursor-pointer text-noble-black-100 hover:bg-noble-black-100 hover:text-noble-black-900 px-4 py-3 text-base">
                   <UserPlus className="h-8 w-8  hover:bg-noble-black-900" />
-                  ユーザー招待
+                  ユーザー管理
                 </DropdownMenuItem>
               </Link>
 
@@ -212,7 +212,7 @@ export default function HomePage() {
       {renderLogoutDialog()}
 
       <main className="h-full container mx-auto px-4 py-6  bg-noble-black-900 relative overflow-hidden">
-          <Spotlight />
+        <Spotlight />
 
         <div className="relative z-40">
 
@@ -223,8 +223,6 @@ export default function HomePage() {
                 {/* Title */}
                 <h2 className="text-base sm:text-lg font-semibold text-noble-black-100 flex items-center gap-2 whitespace-nowrap shrink-0">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mr-0.5 bg-noble-black-900 border border-noble-black-500/20 rounded-full text-noble-black-100 flex items-center justify-center">ミ</div>
-
-                  データ入力パネル
                 </h2>
 
                 <div className="relative shrink-0">

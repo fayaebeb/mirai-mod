@@ -93,7 +93,7 @@ export default function AdminPage() {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <h1 className="text-2xl sm:text-3xl font-bold text-noble-black-100">
-                管理者ダッシュボード
+                モデレーター管理
               </h1>
             </div>
 
