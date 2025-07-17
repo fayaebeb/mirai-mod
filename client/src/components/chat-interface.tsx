@@ -73,13 +73,13 @@ const LoadingDots = () => {
 //     {
 //       title: "ようこそ！",
 //       description:
-//         "「桜AI」は、PCKKにおいて、情報提供や質問への回答を行うAIです。私の役割は、さまざまなトピックについて正確で分かりやすい情報を提供し、ユーザーのリクエストに的確にお応えすることです。たとえば、データに基づくご質問には、社内資料や外部情報を参照しながら丁寧にお答えします。",
+//         "「ミライAI」は、PCKKにおいて、情報提供や質問への回答を行うAIです。私の役割は、さまざまなトピックについて正確で分かりやすい情報を提供し、ユーザーのリクエストに的確にお応えすることです。たとえば、データに基づくご質問には、社内資料や外部情報を参照しながら丁寧にお答えします。",
 //       icon: <Sparkles className="h-5 w-5 text-pink-400" />,
 //     },
 //     {
 //       title: "楽しくお話ししましょう！",
 //       description:
-//         "「桜AI」は、OpenAIの生成モデル「ChatGPT-4o」を使用しています。社内の全国うごき統計に関する営業資料や、人流に関する社内ミニ講座の内容を基礎データとして取り込み、さらにWikipediaやGoogleのAPIを通じてインターネット上の情報も収集しています。これらの情報をもとに、最適な回答を生成しています。",
+//         "「ミライAI」は、OpenAIの生成モデル「ChatGPT-4o」を使用しています。社内の全国うごき統計に関する営業資料や、人流に関する社内ミニ講座の内容を基礎データとして取り込み、さらにWikipediaやGoogleのAPIを通じてインターネット上の情報も収集しています。これらの情報をもとに、最適な回答を生成しています。",
 //       icon: <Heart className="h-5 w-5 text-red-400" />,
 //     },
 //   ];
@@ -608,7 +608,7 @@ export default function ChatInterface({
                 />
               </div>
               <h3 className="text-lg font-medium text-center mb-2">
-                桜AIデータ入力パネル
+                ミライAIデータ入力パネル
               </h3>
               <p className="text-center text-muted-foreground text-sm max-w-md">
                 📝テキストや🔗URLの入力、📁ファイルのアップロードができます。
@@ -630,7 +630,7 @@ export default function ChatInterface({
               <p className="text-sm text-muted-foreground">
                 {uploadFiles.isPending
                   ? "ファイルを処理中です..."
-                  : "桜AIがデータを処理しています...！"}
+                  : "ミライAIがデータを処理しています...！"}
               </p>
             </div>
           )}

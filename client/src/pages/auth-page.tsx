@@ -192,7 +192,7 @@ export default function AuthPage() {
 
         {/* Branding Section (Hidden in Mobile) */}
         <div className="hidden md:flex flex-col justify-center items-center p-10 bg-noble-black-900 text-[#16213e] rounded-l-2xl">
-          <img src="/images/miraimod.png" alt="桜AI ロゴ" className="w-3/4 mb-8 drop-shadow-lg" />
+          <img src="/images/miraimod.png" alt="ミライAI ロゴ" className="w-3/4 mb-8 drop-shadow-lg" />
         </div>
       </div>
     );

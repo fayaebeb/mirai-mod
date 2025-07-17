@@ -307,7 +307,7 @@ export default function HomePage() {
             animate={{ opacity: [0.6, 1, 0.6] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
-            桜AI - モデレーター版
+            ミライAI - モデレーター版
           </motion.p>
         </div>
       </footer>
