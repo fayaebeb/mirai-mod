@@ -92,6 +92,11 @@ const TurnstileWidget = forwardRef<TurnstileWidgetHandle, Props>(
             onToken(null);
         }, [onToken]);
 
+        if (!siteKey) {
+            console.error("❌ Missing VITE_TURNSTILE_SITE_KEY");
+            return null;
+        }
+
         return (
             <div
                 ref={containerRef}
