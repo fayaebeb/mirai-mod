@@ -13,11 +13,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { useForm } from "react-hook-form";
 import { insertUserSchema, loginSchema } from "@shared/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { Loader2, Mail, Lock, User, LogIn, Ticket } from "lucide-react";
 import { DotPulse } from 'ldrs/react'
 import 'ldrs/react/DotPulse.css'
+import TurnstileWidget, { TurnstileWidgetHandle } from "@/components/TurnstileWidget";
+import { toast } from "@/hooks/use-toast";
 
 // Default values shown
 
@@ -25,6 +27,8 @@ export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [, setLocation] = useLocation();
+  const turnstileRef = useRef<TurnstileWidgetHandle>(null);
+  const [captcha, setCaptcha] = useState<string | null>(null);
 
   // Use the appropriate schema based on whether the user is logging in or registering
   const form = useForm({
@@ -50,13 +54,51 @@ export default function AuthPage() {
 
   if (!user) {
     const onSubmit = form.handleSubmit((data) => {
-      if (isLogin) {
-        // For login, we only need username and password
-        const { username, password } = data;
-        loginMutation.mutate({ username, password });
-      } else {
-        // For registration, we need all fields including invite token
-        registerMutation.mutate(data);
+
+      if (!captcha) {
+        toast({
+          title: "ログイン成功",
+          description: "ようこそ！桜AIがあなたをお待ちしていました。",
+        });
+        return;
+      }
+
+      console.log("Before mutation - captcha:", captcha);
+      console.log("Turnstile ref:", turnstileRef.current);
+      try {
+        if (isLogin) {
+          // For login, we only need username and password
+          const { username, password } = data;
+          loginMutation.mutate({ username, password, turnstileToken: captcha });
+        } else {
+          // For registration, we need all fields including invite token
+          registerMutation.mutate({ ...data, turnstileToken: captcha });
+        }
+        console.log("Success - about to reset captcha");
+
+        // Try multiple reset approaches
+        if (turnstileRef.current) {
+          console.log("Calling reset...");
+          turnstileRef.current.reset();
+          setCaptcha(null);
+          console.log("Reset called, captcha cleared");
+        } else {
+          console.error("Turnstile ref is null!");
+        }
+
+      } catch (error) {
+        console.log("Error - about to reset captcha");
+
+        if (turnstileRef.current) {
+          console.log("Calling reset on error...");
+          turnstileRef.current.reset();
+          setCaptcha(null);
+          console.log("Reset called on error, captcha cleared");
+        } else {
+          console.error("Turnstile ref is null on error!");
+        }
+
+        console.error('Authentication failed:', error);
       }
     });
 
@@ -153,10 +195,12 @@ export default function AuthPage() {
                   />
                 )}
 
+                <TurnstileWidget ref={turnstileRef} onToken={setCaptcha} />
+
                 <Button
                   type="submit"
                   className="w-full py-6 h-12 bg-black hover:bg-noble-black-100 text-noble-black-100 hover:text-noble-black-900 transition-colors duration-300 mt-2 shadow-md"
-                  disabled={loginMutation.isPending || registerMutation.isPending}
+                  disabled={loginMutation.isPending || registerMutation.isPending || !captcha}
                 >
                   {loginMutation.isPending || registerMutation.isPending ? (
                     <DotPulse

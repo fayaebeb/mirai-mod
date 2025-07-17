@@ -13,13 +13,15 @@ type AuthContextType = {
   user: SelectUser | null;
   isLoading: boolean;
   error: Error | null;
-  loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
+  loginMutation: UseMutationResult<SelectUser, Error, LoginPayload>;
   logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
+  registerMutation: UseMutationResult<SelectUser, Error, RegisterPayload>;
 };
 
 // LoginData is now based on our login schema
 type LoginData = z.infer<typeof loginSchema>;
+type RegisterPayload = InsertUser & { turnstileToken: string };
+type LoginPayload = LoginData & { turnstileToken: string };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -33,9 +35,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
-  const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
+  const loginMutation = useMutation<SelectUser, Error, LoginPayload>({
+    mutationFn: async ({ turnstileToken, ...credentials }) => {
+      const res = await apiRequest("POST", "/api/login", {
+        ...credentials,
+        turnstileToken,
+      });
       return await res.json();
     },
     onSuccess: async (user: SelectUser) => {
@@ -51,9 +56,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const registerMutation = useMutation({
-    mutationFn: async (credentials: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
+  const registerMutation = useMutation<SelectUser, Error, RegisterPayload>({
+    mutationFn: async ({ turnstileToken, ...credentials }) => {
+      const res = await apiRequest("POST", "/api/register", {
+        ...credentials,
+        turnstileToken,
+      });
       return await res.json();
     },
     onSuccess: (user: SelectUser) => {
