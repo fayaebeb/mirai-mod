@@ -103,7 +103,7 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/register", verifyTurnstile , async (req, res, next) => {
+  app.post("/api/register", async (req, res, next) => {
     try {
       const { inviteToken, ...userData } = req.body;
       
@@ -140,7 +140,7 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/login", loginLimiter, verifyTurnstile ,  passport.authenticate("local"), (req, res) => {
+  app.post("/api/login", loginLimiter ,  passport.authenticate("local"), (req, res) => {
     res.status(200).json({ id: req.user!.id, username: req.user!.username });
   });
 

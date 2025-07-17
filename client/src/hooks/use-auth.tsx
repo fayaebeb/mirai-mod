@@ -13,9 +13,9 @@ type AuthContextType = {
   user: SelectUser | null;
   isLoading: boolean;
   error: Error | null;
-  loginMutation: UseMutationResult<SelectUser, Error, LoginPayload>;
+  loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<SelectUser, Error, RegisterPayload>;
+  registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
 };
 
 // LoginData is now based on our login schema
@@ -35,12 +35,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
-  const loginMutation = useMutation<SelectUser, Error, LoginPayload>({
-    mutationFn: async ({ turnstileToken, ...credentials }) => {
-      const res = await apiRequest("POST", "/api/login", {
-        ...credentials,
-        turnstileToken,
-      });
+  const loginMutation = useMutation({
+    mutationFn: async (credentials: LoginData) => {
+      const res = await apiRequest("POST", "/api/login", credentials);
       return await res.json();
     },
     onSuccess: async (user: SelectUser) => {
@@ -56,12 +53,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const registerMutation = useMutation<SelectUser, Error, RegisterPayload>({
-    mutationFn: async ({ turnstileToken, ...credentials }) => {
-      const res = await apiRequest("POST", "/api/register", {
-        ...credentials,
-        turnstileToken,
-      });
+  const registerMutation = useMutation({
+    mutationFn: async (credentials: InsertUser) => {
+      const res = await apiRequest("POST", "/api/register", credentials);
       return await res.json();
     },
     onSuccess: (user: SelectUser) => {
